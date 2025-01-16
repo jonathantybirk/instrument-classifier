@@ -4,61 +4,112 @@ from torch.utils.data import Dataset
 import numpy as np
 from scipy.io import wavfile
 import librosa
-
-# Create spectrogram with librosa
+import pandas as pd
 import matplotlib.pyplot as plt
+import random
+from tqdm import tqdm
 
 
 
 class MyDataset(Dataset):
-    """My custom dataset."""
+    """Dataset class for audio classification."""
 
-    def __init__(self, raw_data_path: Path) -> None:
-        self.data_path = raw_data_path
+    def __init__(self, data_path: Path, metadata_path: Path) -> None:
+        self.data_path = data_path
+        self.metadata = pd.read_csv(metadata_path)
+        self.classes = self.metadata['Class'].unique()
+        self.class_to_idx = {cls: idx for idx, cls in enumerate(self.classes)}
 
     def __len__(self) -> int:
         """Return the length of the dataset."""
+        return len(self.metadata)
 
     def __getitem__(self, index: int):
         """Return a given sample from the dataset."""
-
-    def preprocess(self, output_folder: Path) -> None:
-        """Preprocess the raw data and save it to the output folder."""
-
-def preprocess(raw_data_path: Path, output_folder: Path) -> None:
-    print("Preprocessing data...")
-    raw_data_path = Path(raw_data_path)
-    for sound_clip in raw_data_path.iterdir():
-        # Load the sound clip as a numpy array
-        sample_rate, data = wavfile.read(sound_clip)
-        if len(data.shape) == 2:
-            data = data.mean(axis=1)
-        print(sample_rate)
-        continue
-
-
-        return 
-        # Generate the spectrogram
-        S = librosa.feature.melspectrogram(y=data, sr=sample_rate, n_mels=128)
-        S_DB = librosa.power_to_db(S, ref=np.max)
-
-        # Save the spectrogram as an image
-        plt.figure(figsize=(10, 4))
-        librosa.display.specshow(S_DB, sr=sample_rate, x_axis='time', y_axis='mel')
-        plt.colorbar(format='%+2.0f dB')
-        plt.title('Mel-frequency spectrogram')
-        plt.tight_layout()
-        plt.savefig(output_folder / f"{sound_clip.stem}_spectrogram.png")
-        plt.close()
-
-        break
-        # Normalize the data
-
+        row = self.metadata.iloc[index]
+        audio_path = self.data_path / row['FileName']
+        label = self.class_to_idx[row['Class']]
         
+        # Load and preprocess audio file
+        sample_rate, data = wavfile.read(audio_path)
+        if len(data.shape) == 2:
+            data = data.mean(axis=1)  # Convert stereo to mono
+            
+        return data, label
 
-    dataset = MyDataset(raw_data_path)
-    dataset.preprocess(output_folder)
+def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) -> None:
+    """Preprocess the raw audio files and save spectrograms."""
+    print("Preprocessing data...")
+    # Set random seed for reproducibility
+    random.seed(random_seed)
+    np.random.seed(random_seed)
 
+    # Define target duration in seconds and sample rate
+    TARGET_DURATION = 10
+    SAMPLE_RATE = 44100  # Standard audio sample rate
+    TARGET_SAMPLES = TARGET_DURATION * SAMPLE_RATE
+
+    for type in ["train", "test"]:
+        # Load metadata
+        metadata_path = raw_data_path / f"metadata_{type}.csv"
+        metadata = pd.read_csv(metadata_path)
+
+        print(f"\nProcessing {type} data...")
+        # Initialize paths
+        raw_data_path = Path(raw_data_path)
+        output_folder = Path(output_folder)
+        output_path = output_folder / type
+        output_path.mkdir(exist_ok=True)
+
+        # Iterate over labels for preprocessing
+        for _, row in tqdm(metadata.iterrows(), total=len(metadata), desc=f"Processing {type} files"):
+            audio_file = raw_data_path / f"{type}_submission" / row['FileName']
+            if not audio_file.exists():
+                print(f"Warning: File {audio_file} not found, skipping...")
+                continue
+        
+            # Load the sound clip
+            try:
+                sample_rate, data = wavfile.read(audio_file)
+                if len(data.shape) == 2:
+                    data = data.mean(axis=1)  # Convert stereo to mono
+
+                # Resample if necessary
+                if sample_rate != SAMPLE_RATE:
+                    # print(f"Resampling {audio_file.name} from {sample_rate}Hz to {SAMPLE_RATE}Hz")
+                    data = librosa.resample(y=data.astype(float), orig_sr=sample_rate, target_sr=SAMPLE_RATE)
+
+                # Handle audio length
+                if len(data) < TARGET_SAMPLES:
+                    # Pad with zeros if audio is too short
+                    padding = TARGET_SAMPLES - len(data)
+                    data = np.pad(data, (0, padding), mode='constant')
+                elif len(data) > TARGET_SAMPLES:
+                    # Randomly select a 10-second segment if audio is too long
+                    max_start = len(data) - TARGET_SAMPLES
+                    start = random.randint(0, max_start)
+                    data = data[start:start + TARGET_SAMPLES]
+
+                # Generate mel spectrogram
+                S = librosa.feature.melspectrogram(y=data.astype(float), sr=sample_rate, 
+                                                n_mels=128, fmax=8000)
+                S_DB = librosa.power_to_db(S, ref=np.max)
+
+                # Save processed audio features
+                np.save(output_path / f"{audio_file.stem}.npy", S_DB)
+                
+            except Exception as e:
+                print(f"Error processing {audio_file}: {str(e)}")
+                continue
+
+    print("Preprocessing completed!")
 
 if __name__ == "__main__":
-    typer.run(preprocess)
+    RAW_DATA = Path("data/raw")
+    OUTPUT_FOLDER = Path("data/processed")
+    OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
+    typer.run(lambda: preprocess(
+        raw_data_path=RAW_DATA,
+        output_folder=OUTPUT_FOLDER,
+        random_seed=42
+    ))
