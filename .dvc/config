@@ -1,0 +1,7 @@
+[core]
+    remote = remote_storage
+[cache]
+    dir = /data/raw
+['remote "remote_storage"']
+    url = gs://mlops-project-1-bucket/
+    version_aware = true
