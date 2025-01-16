@@ -1,2 +1,11 @@
 model:
-  # some hyperparatemers I guess?
+  num_classes: 4
+  input_channels: 1
+
+dummy_input:
+  batch_size: 8
+  n_mels: 128
+  seq_len: 200
+
+logging:
+  level: INFO  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
