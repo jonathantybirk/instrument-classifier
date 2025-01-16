@@ -10,14 +10,13 @@ import random
 from tqdm import tqdm
 
 
-
 class MyDataset(Dataset):
     """Dataset class for audio classification."""
 
     def __init__(self, data_path: Path, metadata_path: Path) -> None:
         self.data_path = data_path
         self.metadata = pd.read_csv(metadata_path)
-        self.classes = self.metadata['Class'].unique()
+        self.classes = self.metadata["Class"].unique()
         self.class_to_idx = {cls: idx for idx, cls in enumerate(self.classes)}
 
     def __len__(self) -> int:
@@ -27,15 +26,16 @@ class MyDataset(Dataset):
     def __getitem__(self, index: int):
         """Return a given sample from the dataset."""
         row = self.metadata.iloc[index]
-        audio_path = self.data_path / row['FileName']
-        label = self.class_to_idx[row['Class']]
-        
+        audio_path = self.data_path / row["FileName"]
+        label = self.class_to_idx[row["Class"]]
+
         # Load and preprocess audio file
         sample_rate, data = wavfile.read(audio_path)
         if len(data.shape) == 2:
             data = data.mean(axis=1)  # Convert stereo to mono
-            
+
         return data, label
+
 
 def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) -> None:
     """Preprocess the raw audio files and save spectrograms."""
@@ -63,11 +63,11 @@ def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) 
 
         # Iterate over labels for preprocessing
         for _, row in tqdm(metadata.iterrows(), total=len(metadata), desc=f"Processing {type} files"):
-            audio_file = raw_data_path / f"{type}_submission" / row['FileName']
+            audio_file = raw_data_path / f"{type}_submission" / row["FileName"]
             if not audio_file.exists():
                 print(f"Warning: File {audio_file} not found, skipping...")
                 continue
-        
+
             # Load the sound clip
             try:
                 sample_rate, data = wavfile.read(audio_file)
@@ -83,33 +83,29 @@ def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) 
                 if len(data) < TARGET_SAMPLES:
                     # Pad with zeros if audio is too short
                     padding = TARGET_SAMPLES - len(data)
-                    data = np.pad(data, (0, padding), mode='constant')
+                    data = np.pad(data, (0, padding), mode="constant")
                 elif len(data) > TARGET_SAMPLES:
                     # Randomly select a 10-second segment if audio is too long
                     max_start = len(data) - TARGET_SAMPLES
                     start = random.randint(0, max_start)
-                    data = data[start:start + TARGET_SAMPLES]
+                    data = data[start : start + TARGET_SAMPLES]
 
                 # Generate mel spectrogram
-                S = librosa.feature.melspectrogram(y=data.astype(float), sr=sample_rate, 
-                                                n_mels=128, fmax=8000)
+                S = librosa.feature.melspectrogram(y=data.astype(float), sr=sample_rate, n_mels=128, fmax=8000)
                 S_DB = librosa.power_to_db(S, ref=np.max)
 
                 # Save processed audio features
                 np.save(output_path / f"{audio_file.stem}.npy", S_DB)
-                
+
             except Exception as e:
                 print(f"Error processing {audio_file}: {str(e)}")
                 continue
 
     print("Preprocessing completed!")
 
+
 if __name__ == "__main__":
     RAW_DATA = Path("data/raw")
     OUTPUT_FOLDER = Path("data/processed")
     OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
-    typer.run(lambda: preprocess(
-        raw_data_path=RAW_DATA,
-        output_folder=OUTPUT_FOLDER,
-        random_seed=42
-    ))
+    typer.run(lambda: preprocess(raw_data_path=RAW_DATA, output_folder=OUTPUT_FOLDER, random_seed=42))
