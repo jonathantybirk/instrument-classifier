@@ -49,7 +49,7 @@ class CNNAudioClassifier(nn.Module):
 
 if __name__ == "__main__":
     # Initialize Hydra and load the configuration
-    with initialize(config_path="../conf", version_base=None):
+    with initialize(config_path="../../conf", version_base=None):
         cfg: DictConfig = compose(config_name="config")
 
     # Set logging level from config
