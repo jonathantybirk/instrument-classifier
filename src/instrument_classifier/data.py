@@ -10,7 +10,7 @@ import random
 from tqdm import tqdm
 
 
-class MyDataset(Dataset):
+class InstrumentDataset(Dataset):
     """Dataset class for audio classification."""
 
     def __init__(self, data_path: Path, metadata_path: Path) -> None:
@@ -26,15 +26,13 @@ class MyDataset(Dataset):
     def __getitem__(self, index: int):
         """Return a given sample from the dataset."""
         row = self.metadata.iloc[index]
-        audio_path = self.data_path / row["FileName"]
+        spectrogram_path = self.data_path / f"{Path(row['FileName']).stem}.npy"
         label = self.class_to_idx[row["Class"]]
 
-        # Load and preprocess audio file
-        sample_rate, data = wavfile.read(audio_path)
-        if len(data.shape) == 2:
-            data = data.mean(axis=1)  # Convert stereo to mono
+        # Load spectrogram
+        spectrogram = np.load(spectrogram_path)
 
-        return data, label
+        return spectrogram, label
 
 
 def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) -> None:
@@ -56,8 +54,6 @@ def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) 
 
         print(f"\nProcessing {type} data...")
         # Initialize paths
-        raw_data_path = Path(raw_data_path)
-        output_folder = Path(output_folder)
         output_path = output_folder / type
         output_path.mkdir(exist_ok=True)
 
@@ -76,7 +72,6 @@ def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) 
 
                 # Resample if necessary
                 if sample_rate != SAMPLE_RATE:
-                    # print(f"Resampling {audio_file.name} from {sample_rate}Hz to {SAMPLE_RATE}Hz")
                     data = librosa.resample(y=data.astype(float), orig_sr=sample_rate, target_sr=SAMPLE_RATE)
 
                 # Handle audio length
