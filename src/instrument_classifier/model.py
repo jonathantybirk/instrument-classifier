@@ -1,9 +1,9 @@
 import torch
 from torch import nn
 import logging
-import pytorch_lightning as pl
 from hydra import initialize, compose
 from omegaconf import DictConfig
+
 
 class CNNAudioClassifier(nn.Module):
     """A CNN-based audio classifier that supports variable-length spectrogram inputs."""
