@@ -118,7 +118,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 1 fill here ---
+MLOPS 64
 
 ### Question 2
 > **Enter the study number for each member in the group**
@@ -129,7 +129,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 2 fill here ---
+s234842, s234854, s234802, s216136
 
 ### Question 3
 > **A requirement to the project is that you include a third-party package not covered in the course. What framework**
@@ -143,7 +143,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 3 fill here ---
+We used the third-party framework librosa in our project, which is a Python package specifically designed for music and audio analysis. We used functionality like `load` and `resample` from the package to handle audio file loading and standardization, ensuring all audio inputs were at a consistent 44.1kHz sample rate regardless of their source format. We utilized `feature.melspectrogram` and `power_to_db` for converting raw audio into mel spectrograms suitable for our CNN model, which transformed our time-domain audio signals into frequency-domain representations that better capture musical features. Librosa helped us significantly by providing robust audio processing capabilities that would have been complex to implement from scratch, particularly in converting variable-length audio files into standardized spectrograms for model training. The framework's efficient implementation of these audio processing algorithms also improved our preprocessing pipeline's performance. Additionally, librosa's built-in functionality for handling different audio file formats and its ability to automatically convert stereo to mono channels greatly simplified our data preprocessing workflow.
 
 ## Coding environment
 
@@ -163,9 +163,20 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 4 fill here ---
+We managed dependencies using miniconda as our primary environment management tool, combined with pip for package installation. The choice of miniconda over vanilla conda provided us with a lightweight installation while still maintaining conda's robust environment management capabilities. Our dependencies were carefully documented in two separate requirements files: `requirements.txt` for core project dependencies and `requirements_dev.txt` for development-specific packages (like testing and linting tools).
 
-### Question 5
+To get a complete copy of our development environment, a new team member would need to follow these steps:
+
+```bash
+conda create -n mlops64 python=3.13
+conda activate mlops64
+pip install -r requirements.txt
+pip install -r requirements_dev.txt
+```
+
+Rather than using `pip freeze`, we manually maintained our requirements files by adding dependencies as we introduced them to the project. This deliberate approach helped us keep our requirements lean and avoid including unnecessary packages that might have been installed in our environments but weren't actually used in the project. We made sure to specify version numbers for critical packages to ensure consistency across all team members' environments.
+
+### Question 5 (CHECK THIS ANSWER)
 
 > **We expect that you initialized your project using the cookiecutter template. Explain the overall structure of your**
 > **code. What did you fill out? Did you deviate from the template in some way?**
@@ -179,9 +190,24 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 5 fill here ---
+From the cookiecutter template, we maintained the standard MLOps project structure with several key directories:
+- `src/` containing our main package code
+- `tests/` for unit tests
+- `data/` for raw and processed data
+- `models/` for saved model artifacts
+- `docs/` for documentation
+- `reports/` for project reports
+- `notebooks/` for exploratory analysis
+- `dockerfiles/` for container definitions
+- `conf/` and `configs/` for configuration management
 
-### Question 6
+We made a few deviations from the standard template by adding additional directories and files:
+- Added a `dockerfiles/` directory specifically for organizing our Docker configurations
+- Maintained both `conf/` and `configs/` directories for different types of configurations
+- Added a comprehensive `.pre-commit-config.yaml` for code quality checks
+- Included DVC configuration with `.dvc/` and `.dvcignore` for data version control
+
+### Question 6 (CHECK THIS ANSWER)
 
 > **Did you implement any rules for code quality and format? What about typing and documentation? Additionally,**
 > **explain with your own words why these concepts matters in larger projects.**
@@ -194,7 +220,25 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
---- question 6 fill here ---
+We implemented several tools and practices for code quality and formatting:
+
+1. **Linting and Formatting**: 
+   - Used Ruff for linting and formatting, configured in `pyproject.toml` with a line length of 120 characters
+   - Implemented pre-commit hooks for automated checks including trailing whitespace removal, YAML validation, and file formatting
+
+2. **Type Checking and Documentation**:
+   - Enforced Python type hints throughout the codebase
+   - Used docstring documentation following Google style for functions and classes
+   - Set up automated documentation generation through the `docs/` directory
+
+These concepts are crucial in larger projects because they ensure:
+1. Code maintainability through consistent formatting and style
+2. Early bug detection through type checking
+3. Easier onboarding of new team members through clear documentation
+4. Prevention of common issues through pre-commit hooks
+5. Reduced code review friction by automating style enforcement
+
+For example, type hints help catch type-related bugs before runtime and serve as inline documentation, making it easier for team members to understand function interfaces without diving into implementation details.
 
 ## Version control
 
@@ -578,3 +622,4 @@ will check the repositories and the code to verify your answers.
 > Answer:
 
 --- question 31 fill here ---
+We have actively used cursor throughout the project to help us write code and debug. However, every single suggestion had to be read by fully by us to ensure correctness and a continual understanding of our codebase.
