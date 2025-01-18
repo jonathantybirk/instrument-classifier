@@ -40,6 +40,12 @@ def preprocess_data(ctx: Context) -> None:
 
 
 @task
+def profile_train(ctx: Context) -> None:
+    """Profile training run and export Chrome trace."""
+    ctx.run(f"python src/{PROJECT_NAME}/profile.py", echo=True, pty=not WINDOWS)
+
+
+@task
 def train(ctx: Context) -> None:
     """Train model."""
     ctx.run(f"python src/{PROJECT_NAME}/train.py", echo=True, pty=not WINDOWS)
