@@ -1,7 +1,7 @@
 import torch
 from torch.profiler import profile, ProfilerActivity, schedule
 
-from instrument_classifier.train import main
+from train import train_model
 
 def profile_training():
     activities = [ProfilerActivity.CPU]
@@ -17,16 +17,20 @@ def profile_training():
     # - warmup=10: Profile the next 10 batches but discard the data (JIT warmup)
     # - active=5: Actually record profiling data for 5 batches
     # - repeat=6: Repeat this cycle 6 times to get multiple samples
-    with profile(
-        activities=activities,
-        schedule=schedule(wait=10, warmup=10, active=5, repeat=6),
-        on_trace_ready=trace_handler,
-        record_shapes=True,
-        with_stack=True,
-        profile_memory=True,
-        with_modules=True
-    ) as prof:
-        main()
+    try:
+        with profile(
+            activities=activities,
+            schedule=schedule(wait=10, warmup=10, active=5, repeat=6),
+            on_trace_ready=trace_handler,
+            record_shapes=True,
+            with_stack=True,
+            profile_memory=True,
+            with_modules=True
+        ) as prof:
+            train_model(profiler=prof)
+    except Exception as e:
+        print(f"Error during profiling: {str(e)}")
+        raise
 
 if __name__ == "__main__":
     profile_training() 
