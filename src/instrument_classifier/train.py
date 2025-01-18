@@ -9,7 +9,7 @@ from data import InstrumentDataset
 from model import CNNAudioClassifier
 
 
-def train_model():
+def train_model(profiler=None):
     logging.info("Initializing training process")
 
     # Example dataset and DataLoader
@@ -29,7 +29,7 @@ def train_model():
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
-        for data, labels in tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}"):
+        for batch_idx, (data, labels) in enumerate(tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}")):
             data = torch.tensor(data).unsqueeze(1).float()  # Example reshape
             optimizer.zero_grad()
             outputs = model(data)
@@ -37,6 +37,10 @@ def train_model():
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
+
+            # Step the profiler if it's active
+            if profiler is not None:
+                profiler.step()
 
         logging.info(f"Epoch [{epoch+1}/{num_epochs}], Loss: {running_loss/len(train_loader):.4f}")
 
