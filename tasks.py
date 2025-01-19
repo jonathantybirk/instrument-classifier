@@ -70,6 +70,22 @@ def docker_build(ctx: Context, progress: str = "plain") -> None:
         f"docker build -t api:latest . -f dockerfiles/api.dockerfile --progress={progress}", echo=True, pty=not WINDOWS
     )
 
+@task
+def run_api(ctx: Context) -> None:
+    """Run API."""
+    ctx.run("uvicorn instrument_classifier.api:app --reload --port 8000", echo=True, pty=not WINDOWS)
+
+@task 
+def healthcheck(ctx: Context) -> None:
+    """Healthcheck API."""
+    command = "curl.exe" if WINDOWS else "curl"
+    ctx.run(f"{command} -s http://localhost:8000/health", echo=True, pty=not WINDOWS)
+
+@task
+def send_request(ctx: Context, path_to_audio: str = r"data\raw\train_submission\emotional-piano-001-d-90-66506.wav") -> None:
+    """Send request to API."""
+    command = "curl.exe" if WINDOWS else "curl"
+    ctx.run(f'{command} -s -F "file=@{path_to_audio}" http://localhost:8000/predict', echo=True, pty=not WINDOWS)
 
 # Documentation commands
 @task(dev_requirements)
