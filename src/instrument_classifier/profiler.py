@@ -17,30 +17,30 @@ def print_profiler_stats(prof: profile) -> None:
         prof: Profiler object containing the profiling data
     """
     print("\n=== Profiling Statistics ===")
-    
+
     # Print overall stats
     print("\nTop 10 time-consuming operations:")
     print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=10))
-    
+
     # Memory stats if available
     if torch.cuda.is_available():
         print("\nGPU Memory Stats:")
         print(prof.key_averages().table(sort_by="cuda_memory_usage", row_limit=10))
-    
+
     print("\nOperation Statistics by Input Shape:")
     print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=10))
 
 
 def profile_training() -> None:
     """Profile the model training process.
-    
+
     This function sets up the PyTorch profiler to analyze the training process.
     It captures:
     - CPU/GPU activity
     - Memory usage
     - Operation shapes
     - Stack traces
-    
+
     The profiling results are:
     1. Exported as a Chrome trace file ('trace.json')
     2. Printed as summary statistics to the console
@@ -51,7 +51,7 @@ def profile_training() -> None:
 
     def trace_handler(p: profile) -> None:
         """Stop training after profiling is complete, export trace and print stats."""
-        p.export_chrome_trace('trace.json')
+        p.export_chrome_trace("trace.json")
         # Calculate total steps based on schedule parameters
         total_steps = (10 + 10 + 5) * 10  # (wait + warmup + active) * repeat
         if p.step_num >= total_steps - 1:
@@ -74,7 +74,7 @@ def profile_training() -> None:
             record_shapes=True,
             with_stack=True,
             profile_memory=True,
-            with_modules=True
+            with_modules=True,
         ) as prof:
             try:
                 train_model(profiler=prof)
@@ -82,7 +82,7 @@ def profile_training() -> None:
                 if str(e) != "Profiling completed":
                     raise
                 print("Training stopped after profiling completion")
-            
+
         # Print statistics after training
         print_profiler_stats(prof)
     except Exception as e:
@@ -92,4 +92,4 @@ def profile_training() -> None:
 
 
 if __name__ == "__main__":
-    profile_training() 
+    profile_training()
