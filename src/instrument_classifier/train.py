@@ -51,7 +51,7 @@ def train_model(num_epochs: int = 5, profiler: Optional[profile] = None) -> None
         model.train()
         running_loss = 0.0
         for batch_idx, (data, labels) in enumerate(tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}")):
-            data = torch.tensor(data).unsqueeze(1).float()  # Example reshape
+            data = data.clone().detach().unsqueeze(1).float()  # Example reshape
             optimizer.zero_grad()
             outputs = model(data)
             loss = criterion(outputs, labels)
