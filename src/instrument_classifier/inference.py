@@ -38,18 +38,22 @@ def process_audio_file(audio_path: str, model: CNNAudioClassifier) -> int:
 
     # Constants
     TARGET_DURATION = 10
-    SAMPLE_RATE = 44100
-    TARGET_SAMPLES = TARGET_DURATION * SAMPLE_RATE
+    TARGET_SR = 44100
+    TARGET_SAMPLES = TARGET_DURATION * TARGET_SR
 
-    # Load and preprocess audio
-    audio_data, sample_rate = librosa.load(audio_path, sr=SAMPLE_RATE)
+    # Load audio with original sample rate
+    audio_data, original_sr = librosa.load(audio_path, sr=None)
+
+    # Resample if necessary
+    if original_sr != TARGET_SR:
+        audio_data = librosa.resample(y=audio_data, orig_sr=original_sr, target_sr=TARGET_SR)
 
     # Handle different audio lengths
     if len(audio_data) < TARGET_SAMPLES:
         # Pad with zeros if too short
         padding = TARGET_SAMPLES - len(audio_data)
         audio_data = np.pad(audio_data, (0, padding), mode="constant")
-        spectrogram = process_audio_segment(audio_data, SAMPLE_RATE)
+        spectrogram = process_audio_segment(audio_data, TARGET_SR)
         return predict_single_segment(model, spectrogram)
 
     else:
@@ -58,7 +62,7 @@ def process_audio_file(audio_path: str, model: CNNAudioClassifier) -> int:
         for start_idx in range(0, len(audio_data), TARGET_SAMPLES):
             segment = audio_data[start_idx : start_idx + TARGET_SAMPLES]
             if len(segment) == TARGET_SAMPLES:  # Only process complete segments
-                spectrogram = process_audio_segment(segment, SAMPLE_RATE)
+                spectrogram = process_audio_segment(segment, TARGET_SR)
                 pred = predict_single_segment(model, spectrogram)
                 predictions.append(pred)
 
