@@ -73,3 +73,9 @@ The directory structure of the project looks like this:
 Created using [mlops_template](https://github.com/SkafteNicki/mlops_template),
 a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting
 started with Machine Learning Operations (MLOps).
+
+# How to use API
+First initialize the API:
+uvicorn instrument_classifier.api:app --reload --port 8000
+
+curl.exe -F "file=@data/raw/train_submission/029500_morning-rain-piano-65875.wav" http://localhost:8000/predict
