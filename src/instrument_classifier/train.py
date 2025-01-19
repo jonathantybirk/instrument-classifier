@@ -14,9 +14,8 @@ import torch.optim as optim
 import logging
 from tqdm import tqdm
 from torch.profiler import profile
-
-from data import InstrumentDataset
-from model import CNNAudioClassifier
+from instrument_classifier.data import InstrumentDataset
+from instrument_classifier.model import CNNAudioClassifier
 
 
 def train_model(num_epochs: int = 5, profiler: Optional[profile] = None) -> None:
