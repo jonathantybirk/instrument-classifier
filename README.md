@@ -76,6 +76,11 @@ started with Machine Learning Operations (MLOps).
 
 # How to use API
 First initialize the API:
-uvicorn instrument_classifier.api:app --reload --port 8000
+invoke run-api
 
-curl.exe -F "file=@data/raw/train_submission/029500_morning-rain-piano-65875.wav" http://localhost:8000/predict
+In another terminal, send request to API:
+invoke send-request [--path-to-audio "path/to/audio/file.wav"]
+(where square brackets are optional)
+
+Note:
+Make sure you've run pip install -e . in the root directory at some point.
