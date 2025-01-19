@@ -9,21 +9,17 @@ import matplotlib.pyplot as plt
 import random
 from tqdm import tqdm
 
-
 class InstrumentDataset(Dataset):
     """Dataset class for audio classification."""
-
     def __init__(self, data_path: Path, metadata_path: Path) -> None:
         self.data_path = data_path
         self.metadata = pd.read_csv(metadata_path)
         self.classes = self.metadata["Class"].unique()
         self.class_to_idx = {cls: idx for idx, cls in enumerate(self.classes)}
         self.idx_to_class = {idx: cls for cls, idx in self.class_to_idx.items()}
-
     def __len__(self) -> int:
         """Return the length of the dataset."""
         return len(self.metadata)
-
     def __getitem__(self, index: int):
         """Return a given sample from the dataset."""
         row = self.metadata.iloc[index]
