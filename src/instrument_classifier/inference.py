@@ -3,7 +3,7 @@ import numpy as np
 import librosa
 from collections import Counter
 from pathlib import Path
-from model import CNNAudioClassifier
+from instrument_classifier.model import CNNAudioClassifier
 
 def process_audio_segment(audio_data: np.ndarray, sample_rate: int = 44100) -> np.ndarray:
     """Process a single 10-second audio segment into a spectrogram."""
@@ -28,6 +28,11 @@ def process_audio_file(audio_path: str, model: CNNAudioClassifier) -> int:
     If the clip is shorter than 10s, pad with zeros.
     If longer than 10s, split into 10s segments and use majority voting.
     """
+    try:
+        model.eval()
+    except Exception as e:
+        print(f"Error setting model to evaluation mode in process_audio_file: {str(e)}")
+
     # Constants
     TARGET_DURATION = 10
     SAMPLE_RATE = 44100
@@ -60,7 +65,7 @@ def process_audio_file(audio_path: str, model: CNNAudioClassifier) -> int:
         else:
             raise ValueError("No valid predictions could be made from the audio file")
 
-def load_model(model_path: str = "models/best_model.pt") -> CNNAudioClassifier:
+def load_model(model_path: str = "models/cnn_audio_classifier.pt") -> CNNAudioClassifier:
     """Load the trained model."""
     model = CNNAudioClassifier(num_classes=4, input_channels=1)
     model.load_state_dict(torch.load(model_path))
