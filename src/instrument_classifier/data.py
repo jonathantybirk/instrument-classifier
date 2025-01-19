@@ -18,6 +18,7 @@ class InstrumentDataset(Dataset):
         self.metadata = pd.read_csv(metadata_path)
         self.classes = self.metadata["Class"].unique()
         self.class_to_idx = {cls: idx for idx, cls in enumerate(self.classes)}
+        self.idx_to_class = {idx: cls for cls, idx in self.class_to_idx.items()}
 
     def __len__(self) -> int:
         """Return the length of the dataset."""
