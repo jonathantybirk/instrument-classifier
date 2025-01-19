@@ -28,5 +28,8 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements_dev.txt
 
+    - name: Change directory to docs
+      run: cd docs
+
     - name: Deploy docs
       run: mkdocs gh-deploy --force
