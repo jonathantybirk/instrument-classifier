@@ -5,7 +5,6 @@ import numpy as np
 from scipy.io import wavfile
 import librosa
 import pandas as pd
-import matplotlib.pyplot as plt
 import random
 from tqdm import tqdm
 
@@ -89,6 +88,9 @@ def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) 
                 # Generate mel spectrogram
                 S = librosa.feature.melspectrogram(y=data.astype(float), sr=sample_rate, n_mels=128, fmax=8000)
                 S_DB = librosa.power_to_db(S, ref=np.max)
+
+                # Normalize from [-80, 0] to [-1, 1] range
+                S_DB = (S_DB + 40) / 40
 
                 # Save processed audio features
                 np.save(output_path / f"{audio_file.stem}.npy", S_DB)
