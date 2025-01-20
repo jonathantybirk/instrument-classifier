@@ -2,7 +2,6 @@ import torch
 import numpy as np
 import librosa
 from collections import Counter
-from pathlib import Path
 from instrument_classifier.model import CNNAudioClassifier
 
 

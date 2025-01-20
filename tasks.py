@@ -92,12 +92,12 @@ def send_request(
     command = "curl.exe" if WINDOWS else "curl"
     ctx.run(f'{command} -s -F "file=@{path_to_audio}" http://localhost:8000/predict', echo=True, pty=not WINDOWS)
 
+
 @task
 def visualize(ctx: Context) -> None:
     """Visualize spectrograms."""
 
     ctx.run(f"python src/{PROJECT_NAME}/visualize.py", echo=True, pty=not WINDOWS)
-
 
 
 # Documentation commands
