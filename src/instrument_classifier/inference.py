@@ -2,7 +2,6 @@ import torch
 import numpy as np
 import librosa
 from collections import Counter
-from pathlib import Path
 from instrument_classifier.model import CNNAudioClassifier
 
 
@@ -11,6 +10,8 @@ def process_audio_segment(audio_data: np.ndarray, sample_rate: int = 44100) -> n
     # Generate mel spectrogram using the same parameters as in data.py
     S = librosa.feature.melspectrogram(y=audio_data.astype(float), sr=sample_rate, n_mels=128, fmax=8000)
     S_DB = librosa.power_to_db(S, ref=np.max)
+    # Normalize from [-80, 0] to [-1, 1] range
+    S_DB = (S_DB + 40) / 40
     return S_DB
 
 
