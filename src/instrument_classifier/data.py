@@ -5,7 +5,6 @@ import numpy as np
 from scipy.io import wavfile
 import librosa
 import pandas as pd
-import matplotlib.pyplot as plt
 import random
 from tqdm import tqdm
 

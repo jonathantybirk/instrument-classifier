@@ -1,10 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-import os
-from pathlib import Path
-import tempfile
-import numpy as np
-from instrument_classifier.api import app, dataset
+from instrument_classifier.api import app
 
 
 @pytest.fixture(scope="module")
