@@ -20,18 +20,18 @@ class CNNAudioClassifier(nn.Module):
         super().__init__()
 
         self.conv_layers = nn.Sequential(
-            nn.Conv2d(input_channels, 4, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
+            nn.Conv2d(input_channels, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(2, 2)),
-            nn.Conv2d(4, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
+            nn.Conv2d(32, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(2, 2)),
-            nn.Conv2d(8, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
+            nn.Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(2, 2)),
         )
 
-        self.fc = nn.Sequential(nn.Flatten(), nn.LazyLinear(10), nn.ReLU(), nn.Linear(10, num_classes))
+        self.fc = nn.Sequential(nn.Flatten(), nn.LazyLinear(100), nn.ReLU(), nn.Linear(100, num_classes))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
