@@ -69,10 +69,12 @@ The directory structure of the project looks like this:
 └── tasks.py                  # Project tasks
 ```
 
+# Getting started
+Install the repository as a module to make imports work in the codebase.
+This can be done by running ´pip install -e .´ in the project root.
+Download required external modules by running `pip install -r requirements_dev.txt`
 
-Created using [mlops_template](https://github.com/SkafteNicki/mlops_template),
-a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting
-started with Machine Learning Operations (MLOps).
+Pull the .wav files used to train the model with `dvc pull`
 
 # How to use API
 First initialize the API:
@@ -82,5 +84,7 @@ In another terminal, send request to API:
 invoke send-request [--path-to-audio "path/to/audio/file.wav"]
 (where square brackets are optional)
 
-Note:
-Make sure you've run pip install -e . in the root directory at some point.
+# Template
+Created using [mlops_template](https://github.com/SkafteNicki/mlops_template),
+a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting
+started with Machine Learning Operations (MLOps). 
