@@ -602,7 +602,7 @@ When we encountered bugs in our experiments, we systematically used debuggers, l
 >
 > Answer:
 
---- question 30 fill here ---
+One of the struggles we faced in this project was setting up DVC with google drive to save our raw dataset, which we tried at for several hours. In the end we were forced to give up on. This problem was due to some security issues between the two services, and this made google drive block DVC. We worked our way around it by doing DVC with a GCP bucket instead. This approach worked out well for us, since we had to use GCP regardless.
 
 ### Question 31
 
