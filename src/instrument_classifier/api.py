@@ -10,9 +10,7 @@ import traceback
 import uvicorn
 
 # Get dataset instance for class mapping
-dataset = InstrumentDataset(
-    Path("data/processed/train"), Path("data/processed/metadata_train.csv")
-)
+dataset = InstrumentDataset(Path("data/processed/train"), Path("data/processed/metadata_train.csv"))
 
 # Load model at startup
 model = None
@@ -42,15 +40,11 @@ async def predict(file: UploadFile):
     Accepts audio files and returns the predicted instrument.
     """
     if not file.filename.lower().endswith((".wav", ".mp3")):
-        raise HTTPException(
-            status_code=400, detail="Only .wav and .mp3 files are supported"
-        )
+        raise HTTPException(status_code=400, detail="Only .wav and .mp3 files are supported")
 
     try:
         # Save uploaded file temporarily
-        with tempfile.NamedTemporaryFile(
-            delete=False, suffix=os.path.splitext(file.filename)[1]
-        ) as temp_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as temp_file:
             content = await file.read()
             temp_file.write(content)
             temp_path = temp_file.name
