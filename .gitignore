@@ -180,8 +180,9 @@ cython_debug/
 data/raw/
 data/processed/
 
-# Ignore models
+# models
 models/
 
 #wandb
 wandb
+
