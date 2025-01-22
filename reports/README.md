@@ -399,7 +399,7 @@ For example, type hints help catch type-related bugs before runtime and serve as
 >
 > Answer:
 
---- question 16 fill here ---
+When we encountered bugs in our experiments, we systematically used debuggers, logging, and unit tests to identify and resolve issues. We also regularly profiled our code to identify performance bottlenecks and optimize efficiency. This approach ensured our code was both effective and efficient.
 
 ## Working in the cloud
 
