@@ -27,7 +27,8 @@ def train_model(
     profiler: Optional[profile] = None,
 ) -> None:
     wandb.init(
-        project="instrument_classifier", config={"num_epochs": num_epochs, "patience": patience, "val_split": val_split}
+        project="instrument_classifier",
+        config={"num_epochs": num_epochs, "patience": patience, "val_split": val_split},
     )
 
     """Train the CNN audio classifier model.
@@ -50,7 +51,7 @@ def train_model(
     # Load the full dataset
     dataset = InstrumentDataset(
         data_path=Path("data/processed/train"),
-        metadata_path=Path("data/raw/metadata_train.csv"),
+        metadata_path=Path("data/processed/metadata_train.csv"),
     )
 
     # Split into train and validation sets
@@ -78,7 +79,9 @@ def train_model(
         model.train()
         total_train_loss = 0
         total_train_samples = 0
-        for batch_idx, (data, labels) in enumerate(tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}")):
+        for batch_idx, (data, labels) in enumerate(
+            tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}")
+        ):
             data = data.clone().detach().unsqueeze(1).float()
             optimizer.zero_grad()
             outputs = model(data)
@@ -116,9 +119,15 @@ def train_model(
         avg_val_loss = total_val_loss / total_val_samples
         val_losses.append(avg_val_loss)
 
-        wandb.log({"epoch": epoch + 1, "train_loss": avg_train_loss, "val_loss": avg_val_loss})
+        wandb.log(
+            {"epoch": epoch + 1, "train_loss": avg_train_loss, "val_loss": avg_val_loss}
+        )
 
-        print(f"Epoch [{epoch+1}/{num_epochs}], " f"Train Loss: {avg_train_loss:.4f}, " f"Val Loss: {avg_val_loss:.4f}")
+        print(
+            f"Epoch [{epoch+1}/{num_epochs}], "
+            f"Train Loss: {avg_train_loss:.4f}, "
+            f"Val Loss: {avg_val_loss:.4f}"
+        )
 
         # Check if this is the best model
         if avg_val_loss < best_val_loss:
