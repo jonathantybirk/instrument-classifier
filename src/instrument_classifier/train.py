@@ -16,9 +16,7 @@ from tqdm import tqdm
 from torch.profiler import profile
 from instrument_classifier.data import InstrumentDataset
 from instrument_classifier.model import CNNAudioClassifier
-
 import wandb
-
 from loguru import logger
 
 # Configure loguru to write logs to a file and not to the console
