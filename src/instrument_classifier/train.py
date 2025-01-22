@@ -19,13 +19,16 @@ from instrument_classifier.model import CNNAudioClassifier
 
 import wandb
 
+
 def train_model(
     num_epochs: int = 50,  # Increased default epochs since we have early stopping
     patience: int = 5,  # Number of epochs to wait before early stopping
     val_split: float = 0.2,  # Validation set size as fraction of total data
     profiler: Optional[profile] = None,
 ) -> None:
-    wandb.init(project="instrument_classifier", config={"num_epochs": num_epochs, "patience": patience, "val_split": val_split})
+    wandb.init(
+        project="instrument_classifier", config={"num_epochs": num_epochs, "patience": patience, "val_split": val_split}
+    )
 
     """Train the CNN audio classifier model.
 
@@ -144,7 +147,7 @@ def train_model(
     plt.legend()
     plt.grid(True)
 
-    # Create reports/figures directory if it doesn't exist 
+    # Create reports/figures directory if it doesn't exist
     figures_dir = Path("reports/figures")
     figures_dir.mkdir(parents=True, exist_ok=True)
 
