@@ -416,7 +416,7 @@ When we encountered bugs in our experiments, we systematically used debuggers, l
 >
 > Answer:
 
---- question 17 fill here ---
+We used GCP Bucket for storing our raw dataset. Bucket worked well because it did not object with security risks when paired up with DVC.
 
 ### Question 18
 
