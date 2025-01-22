@@ -1,5 +1,4 @@
 [core]
     remote = remote_storage
 ['remote "remote_storage"']
-    url = gs://my_mlops_storage_bucket/
-    version_aware = true
+    url = ../my_mlops_storage_bucket2
