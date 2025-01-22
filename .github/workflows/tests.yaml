@@ -33,6 +33,9 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements_dev.txt
 
+      - name: Pull DVC data
+        run: dvc pull data/processed
+
       - name: Test with pytest
         run: |
           pytest tests/test_data.py
