@@ -57,6 +57,9 @@ def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) 
         output_path = output_folder / type
         output_path.mkdir(exist_ok=True)
 
+        # simply copy the metadata to the output folder
+        metadata.to_csv(output_folder / f"metadata_{type}.csv", index=False)
+
         # Iterate over labels for preprocessing
         for _, row in tqdm(metadata.iterrows(), total=len(metadata), desc=f"Processing {type} files"):
             audio_file = raw_data_path / f"{type}_submission" / row["FileName"]

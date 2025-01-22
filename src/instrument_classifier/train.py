@@ -33,7 +33,8 @@ def train_model(
     profiler: Optional[profile] = None,
 ) -> None:
     wandb.init(
-        project="instrument_classifier", config={"num_epochs": num_epochs, "patience": patience, "val_split": val_split}
+        project="instrument_classifier",
+        config={"num_epochs": num_epochs, "patience": patience, "val_split": val_split},
     )
 
     """Train the CNN audio classifier model.
@@ -56,7 +57,7 @@ def train_model(
     # Load the full dataset
     dataset = InstrumentDataset(
         data_path=Path("data/processed/train"),
-        metadata_path=Path("data/raw/metadata_train.csv"),
+        metadata_path=Path("data/processed/metadata_train.csv"),
     )
 
     # Split into train and validation sets
