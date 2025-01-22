@@ -14,5 +14,5 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Build the Docker image
+    - name: Build the train Docker image
       run: docker build . --file dockerfiles/train.dockerfile --tag train_image:$(date +%s)
