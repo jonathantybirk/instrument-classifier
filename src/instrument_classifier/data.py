@@ -61,9 +61,7 @@ def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) 
         metadata.to_csv(output_folder / f"metadata_{type}.csv", index=False)
 
         # Iterate over labels for preprocessing
-        for _, row in tqdm(
-            metadata.iterrows(), total=len(metadata), desc=f"Processing {type} files"
-        ):
+        for _, row in tqdm(metadata.iterrows(), total=len(metadata), desc=f"Processing {type} files"):
             audio_file = raw_data_path / f"{type}_submission" / row["FileName"]
             if not audio_file.exists():
                 print(f"Warning: File {audio_file} not found, skipping...")
@@ -77,9 +75,7 @@ def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) 
 
                 # Resample if necessary
                 if sample_rate != SAMPLE_RATE:
-                    data = librosa.resample(
-                        y=data.astype(float), orig_sr=sample_rate, target_sr=SAMPLE_RATE
-                    )
+                    data = librosa.resample(y=data.astype(float), orig_sr=sample_rate, target_sr=SAMPLE_RATE)
 
                 # Handle audio length
                 if len(data) < TARGET_SAMPLES:
@@ -93,9 +89,7 @@ def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) 
                     data = data[start : start + TARGET_SAMPLES]
 
                 # Generate mel spectrogram
-                S = librosa.feature.melspectrogram(
-                    y=data.astype(float), sr=sample_rate, n_mels=128, fmax=8000
-                )
+                S = librosa.feature.melspectrogram(y=data.astype(float), sr=sample_rate, n_mels=128, fmax=8000)
                 S_DB = librosa.power_to_db(S, ref=np.max)
 
                 # Normalize from [-80, 0] to [-1, 1] range
@@ -115,8 +109,4 @@ if __name__ == "__main__":
     RAW_DATA = Path("data/raw")
     OUTPUT_FOLDER = Path("data/processed")
     OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
-    typer.run(
-        lambda: preprocess(
-            raw_data_path=RAW_DATA, output_folder=OUTPUT_FOLDER, random_seed=42
-        )
-    )
+    typer.run(lambda: preprocess(raw_data_path=RAW_DATA, output_folder=OUTPUT_FOLDER, random_seed=42))

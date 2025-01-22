@@ -19,6 +19,14 @@ from instrument_classifier.model import CNNAudioClassifier
 
 import wandb
 
+from loguru import logger
+
+# Configure loguru to write logs to a file and not to the console
+logger.remove()  # Remove the default logger
+logger.add("training.log", rotation="100 MB")
+
+logger.info("Loguru logger initialized")
+
 
 def train_model(
     num_epochs: int = 50,  # Increased default epochs since we have early stopping
@@ -79,9 +87,7 @@ def train_model(
         model.train()
         total_train_loss = 0
         total_train_samples = 0
-        for batch_idx, (data, labels) in enumerate(
-            tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}")
-        ):
+        for batch_idx, (data, labels) in enumerate(tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}")):
             data = data.clone().detach().unsqueeze(1).float()
             optimizer.zero_grad()
             outputs = model(data)
@@ -97,9 +103,14 @@ def train_model(
             if profiler is not None:
                 profiler.step()
 
+            # Log batch loss to the designated file for specific batches
+            if batch_idx + 1 in [1, 10, 20, 30, 40, 50, 60]:
+                logger.info(f"Batch [{batch_idx+1}/{len(train_loader)}], Loss: {loss.item():.4f}")
+
         avg_train_loss = total_train_loss / total_train_samples
         train_losses.append(avg_train_loss)
         wandb.log({"train_loss": avg_train_loss})
+        logger.warning(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {avg_train_loss:.4f}")
 
         # Validation phase
         model.eval()
@@ -119,15 +130,9 @@ def train_model(
         avg_val_loss = total_val_loss / total_val_samples
         val_losses.append(avg_val_loss)
 
-        wandb.log(
-            {"epoch": epoch + 1, "train_loss": avg_train_loss, "val_loss": avg_val_loss}
-        )
+        wandb.log({"epoch": epoch + 1, "train_loss": avg_train_loss, "val_loss": avg_val_loss})
 
-        print(
-            f"Epoch [{epoch+1}/{num_epochs}], "
-            f"Train Loss: {avg_train_loss:.4f}, "
-            f"Val Loss: {avg_val_loss:.4f}"
-        )
+        print(f"Epoch [{epoch+1}/{num_epochs}], " f"Train Loss: {avg_train_loss:.4f}, " f"Val Loss: {avg_val_loss:.4f}")
 
         # Check if this is the best model
         if avg_val_loss < best_val_loss:
@@ -138,13 +143,15 @@ def train_model(
             patience_counter += 1
 
         # Early stopping check
-        if patience_counter >= patience:
-            wandb.log({"early_stopping_epoch": epoch + 1})
-            print(f"Early stopping triggered after {epoch + 1} epochs")
+        if patience - patience_counter <= 3:
+            logger.warning(
+                f"Warning: Early stopping will be triggered in {patience - patience_counter} epochs if no improvement in validation loss T-T"
+            )
             break
 
     # Save the best model
     torch.save(best_model_state, Path("models/best_cnn_audio_classifier.pt"))
+    logger.warning("Training has ended and the model has been saved in models/best_cnn_audio_classifier.pt")
 
     # Create and save the loss plot
     plt.figure(figsize=(10, 6))
