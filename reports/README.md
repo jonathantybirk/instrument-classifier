@@ -197,7 +197,7 @@ From the cookiecutter template, we maintained the standard MLOps project structu
 - `models/` for saved model artifacts
 - `docs/` for documentation
 - `reports/` for project reports
-- `notebooks/` for exploratory analysis
+- `notebooks/` This was not used and therefore removed
 - `dockerfiles/` for container definitions
 - `conf/` and `configs/` for configuration management
 
