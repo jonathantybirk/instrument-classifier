@@ -369,7 +369,8 @@ For example, type hints help catch type-related bugs before runtime and serve as
 >
 > Answer:
 
---- question 14 fill here ---
+We used W&B to track training loss and validation loss during our experiment. As shown in the image, monitoring the training loss helps us track how well the model is learning from the training data. The validation loss, shown in the other graph, helps us assess how well the model generalizes to unseen instrumental audio files. Ideally, both should decrease, but if the validation loss starts increasing while the training loss continues to decrease as seen in the image, it indicates overfitting. These metrics thus helped us for understanding the model's performance and making adjustments in the architecture to prevent overfitting.
+![alt text](figures/image.png)
 
 ### Question 15
 
