@@ -15,7 +15,7 @@ def evaluate_model():
 
     logging.info("Loading model weights")
     model = CNNAudioClassifier(num_classes=4, input_channels=1)
-    model.load_state_dict(torch.load("models/cnn_audio_classifier.pt"))
+    model.load_state_dict(torch.load("models/best_cnn_audio_classifier.pt"))
     model.eval()
 
     # Placeholder loop for evaluation

@@ -369,7 +369,7 @@ For example, type hints help catch type-related bugs before runtime and serve as
 >
 > Answer:
 
-We used W&B to track training loss and validation loss during our experiment. As shown in the image, monitoring the training loss helps us track how well the model is learning from the training data. The validation loss, shown in the other graph, helps us assess how well the model generalizes to unseen instrumental audio files. Ideally, both should decrease, but if the validation loss starts increasing while the training loss continues to decrease as seen in the image, it indicates overfitting. These metrics thus helped us for understanding the model's performance and making adjustments in the architecture to prevent overfitting.
+We used W&B to track training loss and validation loss during our experiment. As shown in the image, monitoring the training loss helps us track how well the model is learning from the training data. The validation loss, shown in the other graph, helps us assess how well the model generalizes to unseen instrumental audio files. Ideally, both should decrease, but if the validation loss starts increasing while the training loss continues to decrease (as seen in the image), it indicates overfitting. These metrics thus helped us for understanding the model's performance and making adjustments in the architecture to prevent overfitting.
 ![alt text](figures/image.png)
 
 ### Question 15
@@ -400,7 +400,7 @@ We used W&B to track training loss and validation loss during our experiment. As
 >
 > Answer:
 
-When we encountered bugs in our experiments, we systematically used debuggers, logging, and unit tests to identify and resolve issues. We also regularly profiled our code to identify performance bottlenecks and optimize efficiency. This approach ensured our code was both effective and efficient.
+When we encountered bugs in our experiments, we systematically used debuggers, logging statements such as "wandb.log({"message": "Initializing training process"}) during training in the experiments as well as logging validation/training loss to identify and resolve issues. Also, as we really wanted to implement both W&B and loguru in our project, we decided to use the latter for making a local log file to show info about preprocessing, training, and evaluation.
 
 ## Working in the cloud
 
