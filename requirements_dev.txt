@@ -16,9 +16,6 @@ mkdocs==1.5.3
 mkdocs-material==9.4.6
 mkdocstrings-python==1.12.2
 
-# configuration
-hydra-core==1.3.2
-
 # profiling
 torch_tb_profiler==0.4.3
 
