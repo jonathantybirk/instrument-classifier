@@ -7,7 +7,9 @@ from src.instrument_classifier.data import InstrumentDataset
 
 def test_my_dataset():
     """Test the InstrumentDataset class."""
-    dataset = InstrumentDataset(Path("data/processed/train"), Path("data/raw/metadata_train.csv"))
+    dataset = InstrumentDataset(
+        Path("data/processed/train"), Path("data/processed/metadata_train.csv")
+    )
     assert isinstance(dataset, Dataset)
 
     # Test a single item from the dataset
