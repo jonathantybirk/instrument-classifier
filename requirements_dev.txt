@@ -25,4 +25,3 @@ torch_tb_profiler==0.4.3
 # visualization
 pygame==2.6.1
 sounddevice==0.5.1
-```
