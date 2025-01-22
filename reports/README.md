@@ -536,7 +536,7 @@ When we encountered bugs in our experiments, we systematically used debuggers, l
 >
 > Answer:
 
---- question 26 fill here ---
+Monitoring extends the longevity of a machine learning application by maintaining model performance through real-time identification of performance declines or anomalies, allowing for timely corrections. It adapts the model to shifts in input data, helping it stay relevant and accurate as external conditions change. Monitoring also refines the model through continuous feedback, improving its accuracy and decision-making capabilities. Additionally, it reduces operational costs by minimizing manual interventions and ensuring efficient resource use. Compliance is also maintained as monitoring ensures that the model's outputs remain fair and within regulatory guidelines, which is vital for applications in regulated sectors.
 
 ## Overall discussion of project
 
