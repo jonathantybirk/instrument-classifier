@@ -192,7 +192,7 @@ Rather than using `pip freeze`, we manually maintained our requirements files by
 
 From the cookiecutter template, we maintained the standard MLOps project structure with several key directories:
 - `src/` containing our main package code
-- `tests/` for unit tests
+- `tests/` for unit and integration tests
 - `data/` for raw and processed data
 - `models/` for saved model artifacts
 - `docs/` for documentation
@@ -229,7 +229,6 @@ We implemented several tools and practices for code quality and formatting:
 2. **Type Checking and Documentation**:
    - Enforced Python type hints throughout the codebase
    - Used docstring documentation following Google style for functions and classes
-   - Set up automated documentation generation through the `docs/` directory
 
 These concepts are crucial in larger projects because they ensure:
 1. Code maintainability through consistent formatting and style
