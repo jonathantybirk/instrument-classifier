@@ -182,3 +182,6 @@ data/processed/
 
 # Ignore models
 models/
+
+#wandb
+wandb

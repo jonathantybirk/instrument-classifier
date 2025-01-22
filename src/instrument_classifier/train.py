@@ -8,16 +8,16 @@ from pathlib import Path
 from typing import Optional
 import json
 import matplotlib.pyplot as plt
-
 import torch
 from torch.utils.data import DataLoader, random_split
 import torch.nn as nn
 import torch.optim as optim
-import logging
 from tqdm import tqdm
 from torch.profiler import profile
 from instrument_classifier.data import InstrumentDataset
 from instrument_classifier.model import CNNAudioClassifier
+
+import wandb
 
 
 def train_model(
@@ -26,6 +26,10 @@ def train_model(
     val_split: float = 0.2,  # Validation set size as fraction of total data
     profiler: Optional[profile] = None,
 ) -> None:
+    wandb.init(
+        project="instrument_classifier", config={"num_epochs": num_epochs, "patience": patience, "val_split": val_split}
+    )
+
     """Train the CNN audio classifier model.
 
     Args:
@@ -41,7 +45,7 @@ def train_model(
     4. Saves the trained model weights
     5. Creates and saves a loss plot
     """
-    logging.info("Initializing training process")
+    wandb.log({"message": "Initializing training process"})
 
     # Load the full dataset
     dataset = InstrumentDataset(
@@ -92,6 +96,7 @@ def train_model(
 
         avg_train_loss = total_train_loss / total_train_samples
         train_losses.append(avg_train_loss)
+        wandb.log({"train_loss": avg_train_loss})
 
         # Validation phase
         model.eval()
@@ -111,9 +116,7 @@ def train_model(
         avg_val_loss = total_val_loss / total_val_samples
         val_losses.append(avg_val_loss)
 
-        logging.info(
-            f"Epoch [{epoch+1}/{num_epochs}], " f"Train Loss: {avg_train_loss:.4f}, " f"Val Loss: {avg_val_loss:.4f}"
-        )
+        wandb.log({"epoch": epoch + 1, "train_loss": avg_train_loss, "val_loss": avg_val_loss})
 
         print(f"Epoch [{epoch+1}/{num_epochs}], " f"Train Loss: {avg_train_loss:.4f}, " f"Val Loss: {avg_val_loss:.4f}")
 
@@ -127,7 +130,8 @@ def train_model(
 
         # Early stopping check
         if patience_counter >= patience:
-            logging.info(f"Early stopping triggered after {epoch + 1} epochs")
+            wandb.log({"early_stopping_epoch": epoch + 1})
+            print(f"Early stopping triggered after {epoch + 1} epochs")
             break
 
     # Save the best model
