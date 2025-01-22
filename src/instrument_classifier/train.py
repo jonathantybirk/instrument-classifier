@@ -25,6 +25,7 @@ logger.add("training.log", rotation="100 MB")
 
 logger.info("Loguru logger initialized")
 
+
 def train_model(
     num_epochs: int = 50,  # Increased default epochs since we have early stopping
     patience: int = 5,  # Number of epochs to wait before early stopping
@@ -141,9 +142,11 @@ def train_model(
 
         # Early stopping check
         if patience - patience_counter <= 3:
-            logger.warning(f"Warning: Early stopping will be triggered in {patience - patience_counter} epochs if no improvement in validation loss T-T")
+            logger.warning(
+                f"Warning: Early stopping will be triggered in {patience - patience_counter} epochs if no improvement in validation loss T-T"
+            )
             break
-    
+
     # Save the best model
     torch.save(best_model_state, Path("models/best_cnn_audio_classifier.pt"))
     logger.warning("Training has ended and the model has been saved in models/best_cnn_audio_classifier.pt")
