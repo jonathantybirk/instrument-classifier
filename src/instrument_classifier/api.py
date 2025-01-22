@@ -10,7 +10,7 @@ import traceback
 import uvicorn
 
 # Get dataset instance for class mapping
-dataset = InstrumentDataset(Path("data/processed/train"), Path("data/raw/metadata_train.csv"))
+dataset = InstrumentDataset(Path("data/processed/train"), Path("data/processed/metadata_train.csv"))
 
 # Load model at startup
 model = None
