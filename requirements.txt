@@ -8,3 +8,7 @@ matplotlib==3.10.0
 invoke==2.2.0
 tqdm==4.67.1
 httpx==0.28.1
+
+# data version control
+dvc==3.59.0
+dvc-gs==3.0.1
