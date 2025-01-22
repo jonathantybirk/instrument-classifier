@@ -31,3 +31,6 @@ dvc-gs==3.0.1
 # visualization
 pygame==2.6.1
 sounddevice==0.5.1
+
+# Logging
+loguru==0.7.3
