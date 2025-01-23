@@ -43,7 +43,7 @@ def preprocess(raw_data_path: Path, output_folder: Path) -> None:
     """Preprocess the raw audio files and save spectrograms."""
     print("Preprocessing data... check /logging/preprocessing.log for progress and errors")
     logger.warning("Preprocessing started")
-    
+
     # Set random seed for reproducibility
     random.seed(42)
     np.random.seed(42)
