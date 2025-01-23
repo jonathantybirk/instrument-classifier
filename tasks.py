@@ -46,10 +46,15 @@ def profile_train(ctx: Context) -> None:
 
 
 @task
-def train(ctx: Context) -> None:
-    """Train model."""
-    ctx.run(f"python src/{PROJECT_NAME}/train.py", echo=True, pty=not WINDOWS)
-
+def train(ctx: Context, overrides: str = "") -> None:
+    """Train model with optional Hydra configuration overrides.
+    
+    Args:
+        ctx: Invoke context
+        overrides: Hydra configuration overrides (e.g. "model.lr=0.001 training.batch_size=32")
+    """
+    cmd = f"python src/{PROJECT_NAME}/train.py {overrides}"
+    ctx.run(cmd, echo=True, pty=not WINDOWS)
 
 @task
 def test(ctx: Context) -> None:

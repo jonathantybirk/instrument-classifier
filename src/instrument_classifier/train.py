@@ -20,6 +20,8 @@ import random
 import numpy as np
 import wandb
 from loguru import logger
+import hydra
+from omegaconf import DictConfig
 
 # Configure loguru to write logs to a file and not to the console
 logger.remove()  # Remove the default logger
@@ -27,72 +29,59 @@ logger.add("logging/training.log", rotation="100 MB")
 
 logger.info("Loguru logger initialized")
 
+@hydra.main(config_path="../../configs", config_name="config", version_base=None)
+def train_model(cfg: DictConfig) -> None:
+    """Train the CNN audio classifier model using Hydra configuration.
 
-def train_model(
-    num_epochs: int = 50,  # Increased default epochs since we have early stopping
-    patience: int = 5,  # Number of epochs to wait before early stopping
-    val_split: float = 0.2,  # Validation set size as fraction of total data
-    profiler: Optional[profile] = None,
-) -> None:
+    Args:
+        cfg: Hydra configuration object containing all parameters
+    """
     # Set all random seeds for reproducibility
-    random.seed(42)
-    np.random.seed(42)
-    torch.manual_seed(42)
-    torch.cuda.manual_seed(42)  # For CUDA GPU
-    torch.cuda.manual_seed_all(42)  # For multi-GPU
+    random.seed(cfg.training.seed)
+    np.random.seed(cfg.training.seed)
+    torch.manual_seed(cfg.training.seed)
+    torch.cuda.manual_seed(cfg.training.seed)  # For CUDA GPU
+    torch.cuda.manual_seed_all(cfg.training.seed)  # For multi-GPU
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     
     # Create a generator for reproducible data splits
-    generator = torch.Generator().manual_seed(42)
-    logger.warning("PyTorch generator seed set to 42 for reproducible data splitting")
+    generator = torch.Generator().manual_seed(cfg.training.seed)
+    logger.warning(f"PyTorch generator seed set to {cfg.training.seed} for reproducible data splitting")
     
     wandb.init(
-        project="instrument_classifier",
-        config={
-            "num_epochs": num_epochs,
-            "patience": patience,
-            "val_split": val_split,
-            "seed": 42
-        },
+        project=cfg.wandb.project,
+        entity=cfg.wandb.entity,
+        config=dict(cfg.training),
     )
 
-    """Train the CNN audio classifier model.
-
-    Args:
-        num_epochs: Number of training epochs. Defaults to 50.
-        patience: Number of epochs to wait before early stopping. Defaults to 5.
-        val_split: Fraction of the dataset to use as validation. Defaults to 0.2.
-        profiler: Optional profiler instance for performance analysis.
-
-    The function:
-    1. Initializes the dataset and dataloaders
-    2. Sets up the model, loss function, and optimizer
-    3. Trains the model for the specified number of epochs
-    4. Saves the trained model weights
-    5. Creates and saves a loss plot
-    """
     wandb.log({"message": "Initializing training process"})
     logger.info("Initializing training process")
 
     # Load the full dataset
     dataset = InstrumentDataset(
-        data_path=Path("data/processed/train"),
-        metadata_path=Path("data/processed/metadata_train.csv"),
+        data_path=Path(cfg.data.train_data_path),
+        metadata_path=Path(cfg.data.train_metadata_path),
     )
 
     # Split into train and validation sets
-    val_size = int(len(dataset) * val_split)
+    val_size = int(len(dataset) * cfg.training.val_split)
     train_size = len(dataset) - val_size
     train_dataset, val_dataset = random_split(dataset, [train_size, val_size], generator=generator)
 
     # Use the same generator for DataLoader to ensure reproducible shuffling
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, generator=generator, worker_init_fn=lambda x: torch.manual_seed(42))
-    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+    train_loader = DataLoader(
+        train_dataset, 
+        batch_size=cfg.training.batch_size, 
+        shuffle=True, 
+        generator=generator, 
+        worker_init_fn=lambda x: torch.manual_seed(cfg.training.seed)
+    )
+    val_loader = DataLoader(val_dataset, batch_size=cfg.training.batch_size, shuffle=False)
 
-    model = CNNAudioClassifier(num_classes=4, input_channels=1)
+    model = CNNAudioClassifier(num_classes=cfg.model.num_classes, input_channels=cfg.model.input_channels)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=cfg.training.learning_rate)
 
     # Initialize tracking variables
     best_val_loss = float("inf")
@@ -102,12 +91,12 @@ def train_model(
     val_losses = []
 
     # Training loop
-    for epoch in range(num_epochs):
+    for epoch in range(cfg.training.num_epochs):
         # Training phase
         model.train()
         total_train_loss = 0
         total_train_samples = 0
-        for batch_idx, (data, labels) in enumerate(tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}")):
+        for batch_idx, (data, labels) in enumerate(tqdm(train_loader, desc=f"Epoch {epoch+1}/{cfg.training.num_epochs}")):
             data = data.clone().detach().unsqueeze(1).float()
             optimizer.zero_grad()
             outputs = model(data)
@@ -120,9 +109,6 @@ def train_model(
             total_train_loss += loss.item() * batch_size
             total_train_samples += batch_size
 
-            if profiler is not None:
-                profiler.step()
-
             # Log batch loss to the designated file for specific batches
             if batch_idx + 1 in [1, 10, 20, 30, 40, 50, 60]:
                 logger.info(f"Batch [{batch_idx+1}/{len(train_loader)}], Loss: {loss.item():.4f}")
@@ -130,7 +116,7 @@ def train_model(
         avg_train_loss = total_train_loss / total_train_samples
         train_losses.append(avg_train_loss)
         wandb.log({"train_loss": avg_train_loss})
-        logger.warning(f"Epoch [{epoch+1}/{num_epochs}], Train Loss: {avg_train_loss:.4f}")
+        logger.warning(f"Epoch [{epoch+1}/{cfg.training.num_epochs}], Train Loss: {avg_train_loss:.4f}")
 
         # Validation phase
         model.eval()
@@ -152,7 +138,7 @@ def train_model(
 
         wandb.log({"epoch": epoch + 1, "train_loss": avg_train_loss, "val_loss": avg_val_loss})
 
-        print(f"Epoch [{epoch+1}/{num_epochs}], " f"Train Loss: {avg_train_loss:.4f}, " f"Val Loss: {avg_val_loss:.4f}")
+        print(f"Epoch [{epoch+1}/{cfg.training.num_epochs}], " f"Train Loss: {avg_train_loss:.4f}, " f"Val Loss: {avg_val_loss:.4f}")
 
         # Check if this is the best model
         if avg_val_loss < best_val_loss:
@@ -163,15 +149,17 @@ def train_model(
             patience_counter += 1
 
         # Early stopping check
-        if patience - patience_counter <= 3:
-            logger.warning(
-                f"Warning: Early stopping will be triggered in {patience - patience_counter} epochs if no improvement in validation loss T-T"
-            )
+        if patience_counter >= cfg.training.patience:
+            logger.warning(f"Early stopping triggered after {epoch+1} epochs")
             break
+        elif cfg.training.patience - patience_counter <= 3:
+            logger.warning(
+                f"Warning: Early stopping will be triggered in {cfg.training.patience - patience_counter} epochs if no improvement in validation loss"
+            )
 
     # Save the best model
-    torch.save(best_model_state, Path("models/best_cnn_audio_classifier.pt"))
-    logger.warning("Training has ended and the model has been saved in models/best_cnn_audio_classifier.pt")
+    torch.save(best_model_state, Path(cfg.paths.model_save))
+    logger.warning(f"Training has ended and the model has been saved in {cfg.paths.model_save}")
 
     # Create and save the loss plot
     plt.figure(figsize=(10, 6))
@@ -183,8 +171,8 @@ def train_model(
     plt.legend()
     plt.grid(True)
 
-    # Create reports/figures directory if it doesn't exist
-    figures_dir = Path("reports/figures")
+    # Create figures directory if it doesn't exist
+    figures_dir = Path(cfg.paths.figures)
     figures_dir.mkdir(parents=True, exist_ok=True)
 
     # Save the plot
