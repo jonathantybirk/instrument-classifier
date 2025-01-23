@@ -45,13 +45,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          python -m pip install -U pip setuptools wheel
-          pip install -r requirements_dev.txt
+      # - name: Install dependencies
+      #   run: |
+      #     python -m pip install -U pip setuptools wheel
+      #     pip install -r requirements_dev.txt
 
-      - name: Pull DVC data
-        run: dvc pull data/processed
+      # - name: Pull DVC data
+      #   run: dvc pull data/processed
 
       - name: Set up Google Cloud authentication
         uses: google-github-actions/auth@v2
