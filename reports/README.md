@@ -424,9 +424,15 @@ We implemented profiling with PyTorch's built-in profiler to analyze our model's
 > Example:
 > *We used the following two services: Engine and Bucket. Engine is used for... and Bucket is used for...*
 >
-> Answer:
-
-We used GCP Bucket for storing our raw dataset. Bucket worked well because it did not object with security risks when paired up with DVC.
+> Answer: We used 4 Google Cloud services.
+> 
+> 1. **Cloud Build**: We used Cloud Build for continuous integration and continuous delivery (CI/CD). It allowed us to automate the build and deployment of our application, ensuring we could always run our code.
+> 
+> 2. **Buckets**: We utilized Buckets for storing both our raw and processed datasets. This service provided a secure and scalable way to store and access our data.
+> 
+> 3. **Engine**: We used Engine to train our models in the cloud, interacting with our logging software.
+> 
+> 4. **Artifact Registry**: We used Artifact Registry to store our Docker images. This service allowed us to manage our container images, making it easy to run our applications after the images have been built.
 
 ### Question 18
 
