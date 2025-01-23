@@ -369,7 +369,8 @@ For example, type hints help catch type-related bugs before runtime and serve as
 >
 > Answer:
 
---- question 14 fill here ---
+We used W&B to track training loss and validation loss during our experiment. As shown in the image, monitoring the training loss helps us track how well the model is learning from the training data. The validation loss, shown in the other graph, helps us assess how well the model generalizes to unseen instrumental audio files. Ideally, both should decrease, but if the validation loss starts increasing while the training loss continues to decrease (as seen in the image), it indicates overfitting. These metrics thus helped us for understanding the model's performance and making adjustments in the architecture to prevent overfitting.
+![alt text](figures/image.png)
 
 ### Question 15
 
@@ -399,7 +400,7 @@ For example, type hints help catch type-related bugs before runtime and serve as
 >
 > Answer:
 
---- question 16 fill here ---
+When we encountered bugs in our experiments, we systematically used debuggers, logging statements such as "wandb.log({"message": "Initializing training process"}) during training in the experiments as well as logging validation/training loss to identify and resolve issues. Also, as we really wanted to implement both W&B and loguru in our project, we decided to use the latter for making a local log file to show info about preprocessing, training, and evaluation.
 
 ## Working in the cloud
 
@@ -416,7 +417,7 @@ For example, type hints help catch type-related bugs before runtime and serve as
 >
 > Answer:
 
---- question 17 fill here ---
+We used GCP Bucket for storing our raw dataset. Bucket worked well because it did not object with security risks when paired up with DVC.
 
 ### Question 18
 
@@ -536,7 +537,7 @@ For example, type hints help catch type-related bugs before runtime and serve as
 >
 > Answer:
 
---- question 26 fill here ---
+Monitoring extends the longevity of a machine learning application by maintaining model performance through real-time identification of performance declines or anomalies, allowing for timely corrections. It adapts the model to shifts in input data, helping it stay relevant and accurate as external conditions change. Monitoring also refines the model through continuous feedback, improving its accuracy and decision-making capabilities. Additionally, it reduces operational costs by minimizing manual interventions and ensuring efficient resource use. Compliance is also maintained as monitoring ensures that the model's outputs remain fair and within regulatory guidelines, which is vital for applications in regulated sectors.
 
 ## Overall discussion of project
 
@@ -602,7 +603,7 @@ For example, type hints help catch type-related bugs before runtime and serve as
 >
 > Answer:
 
---- question 30 fill here ---
+One of the struggles we faced in this project was setting up DVC with google drive to save our raw dataset, which we tried at for several hours. In the end we were forced to give up on. This problem was due to some security issues between the two services, and this made google drive block DVC. We worked our way around it by doing DVC with a GCP bucket instead. This approach worked out well for us, since we had to use GCP regardless.
 
 ### Question 31
 
