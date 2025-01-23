@@ -125,3 +125,19 @@ def build_docs(ctx: Context) -> None:
 def serve_docs(ctx: Context) -> None:
     """Serve documentation."""
     ctx.run("mkdocs serve --config-file docs/mkdocs.yaml", echo=True, pty=not WINDOWS)
+
+
+# Evaluate
+@task
+def evaluate(ctx: Context) -> None:
+    """Evaluate model."""
+    # Set environment variable to suppress the FutureWarning about torch.load
+    os.environ["PYTHONWARNINGS"] = "ignore::FutureWarning"
+    try:
+        ctx.run(f"python src/{PROJECT_NAME}/evaluate.py", echo=True, pty=not WINDOWS)
+    except Exception as e:
+        print(f"Evaluation failed: {str(e)}")
+        print("Please ensure:")
+        print("- The model file exists at 'models/best_cnn_audio_classifier.pt'")
+        print("- The evaluation dataset is properly set up")
+        raise
