@@ -10,12 +10,10 @@ COPY requirements_dev.txt requirements_dev.txt
 
 RUN pip install -r requirements.txt --no-cache-dir --verbose
 
-RUN dvc pull data/processed
-
 COPY src/instrument_classifier/train.py src/instrument_classifier/train.py
 COPY src/instrument_classifier/data.py src/instrument_classifier/data.py
 COPY src/instrument_classifier/model.py src/instrument_classifier/model.py
-COPY README.md README.md
+COPY data/processed.dvc data/processed.dvc
 COPY pyproject.toml pyproject.toml
 
 RUN pip install . --no-deps --no-cache-dir --verbose
