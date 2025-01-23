@@ -48,13 +48,27 @@ def profile_train(ctx: Context) -> None:
 @task
 def train(ctx: Context, overrides: str = "") -> None:
     """Train model with optional Hydra configuration overrides.
-    
+
     Args:
         ctx: Invoke context
         overrides: Hydra configuration overrides (e.g. "model.lr=0.001 training.batch_size=32")
     """
     cmd = f"python src/{PROJECT_NAME}/train.py {overrides}"
     ctx.run(cmd, echo=True, pty=not WINDOWS)
+
+
+@task
+def train_cloud(ctx: Context, overrides: str = "") -> None:
+    """Train model with optional Hydra configuration overrides.
+
+    Args:
+        ctx: Invoke context
+        overrides: Hydra configuration overrides (e.g. "model.lr=0.001 training.batch_size=32")
+    """
+    cmd = "gcloud ai custom-jobs create --region=europe-west4 --display-name=test-run --config=configs/config_gpu.yaml --command 'python src/instrument_classifier/train.py' --args=-m --args=--training.num_epochs=1,2"
+
+    ctx.run(cmd, echo=True, pty=not WINDOWS)
+
 
 @task
 def test(ctx: Context) -> None:

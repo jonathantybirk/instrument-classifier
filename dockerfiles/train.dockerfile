@@ -17,5 +17,3 @@ COPY data/processed data/processed
 COPY pyproject.toml pyproject.toml
 
 RUN pip install . --no-deps --no-cache-dir --verbose
-
-ENTRYPOINT ["python", "-u", "src/instrument_classifier/train.py"]
