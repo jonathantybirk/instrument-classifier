@@ -23,7 +23,7 @@ def evaluate_model():
     total = 0
     with torch.no_grad():
         for data, label in eval_loader:
-            data = torch.tensor(data).unsqueeze(1).float()  # Example reshape
+            data = data.clone().detach().unsqueeze(1).float()  # More efficient tensor construction
             outputs = model(data)
             predicted = outputs.argmax(dim=1)
             correct += (predicted == label).sum().item()
