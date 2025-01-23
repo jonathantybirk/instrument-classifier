@@ -402,7 +402,14 @@ We used W&B to track training loss and validation loss during our experiment. As
 >
 > Answer:
 
-When we encountered bugs in our experiments, we systematically used debuggers, logging statements such as "wandb.log({"message": "Initializing training process"}) during training in the experiments as well as logging validation/training loss to identify and resolve issues. Also, as we really wanted to implement both W&B and loguru in our project, we decided to use the latter for making a local log file to show info about preprocessing, training, and evaluation.
+When we encountered bugs in our experiments, we systematically read through the traceback error message and the logging outputs from standard libraries such as W&B and loguru, e.g. using the command ```wandb.log({"message": "Initializing training process"})``` and used the python debugger.
+
+During training we used the logs of validation/training loss graphs to identify and resolve issues with our model and other high-level experimental issues. 
+
+As we really wanted to implement both W&B and loguru in our project, we decided to use the latter for making a local log file to show info about preprocessing, training, inference/API calls and evaluation and the former for logging and visualizing the training process in W&B in real-time. We found W&B useful for collaborative efforts due to the online frontend.
+
+Profiling:
+We implemented profiling with PyTorch's built-in profiler to analyze our model's performance. The profiling results showed that the majority of time is spent on essential computations: backward pass (288ms), forward pass (200ms), and optimizer step (81ms) per batch of 8 samples. The total training time for 5 batches averaged 2934ms, with only 89ms (3%) spent on auxiliary tasks. We assume this distribution is quite optimal for our hardware and model architecture, as the bulk of computation time (97%) is dedicated to core model operations which are built in the optimized PyTorch backend.
 
 ## Working in the cloud
 
@@ -563,7 +570,7 @@ For unit testing, we used pytest with FastAPI's TestClient to test our API endpo
 3. Error handling for invalid file types
 4. Model loading verification
 
-However, we did not implement load testing. If we were to implement it, we would use locust, a popular Python-based load testing tool. The load testing implementation would something look like this:
+However, we did not implement load testing. If we were to implement it, we would use locust for basic load testing, combined with additional monitoring tools:
 
 ```python
 from locust import HttpUser, task, between
@@ -582,14 +589,17 @@ class InstrumentClassifierUser(HttpUser):
         self.client.get("/health")
 ```
 
-This would help us understand:
+This basic load testing would help us understand:
 - Maximum requests per second our API can handle
 - Response time distribution under different loads
 - System behavior under sustained heavy traffic
-- Resource utilization patterns
-- Potential bottlenecks in our inference pipeline
 
-The load testing would be particularly important since our API processes audio files, which can be resource-intensive both in terms of memory and CPU usage.
+To properly monitor resource utilization, we would need to add:
+- CPU/Memory profiling tools like cProfile or memory_profiler
+- System monitoring tools like Prometheus for tracking system metrics
+- Application metrics through the FastAPI /metrics endpoint
+
+The combination would be particularly important since our API processes audio files, which can be resource-intensive both in terms of memory and CPU usage.
 
 ### Question 26
 
