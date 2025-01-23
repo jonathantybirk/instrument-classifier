@@ -18,7 +18,7 @@ class InstrumentDataset(Dataset):
     """Dataset class for audio classification."""
 
     def __init__(self, data_path: Path, metadata_path: Path) -> None:
-        self.data_path = data_path
+        self.data_path = Path(data_path)  # Convert to Path object explicitly
         self.metadata = pd.read_csv(metadata_path)
         self.classes = self.metadata["Class"].unique()
         self.class_to_idx = {cls: idx for idx, cls in enumerate(self.classes)}
