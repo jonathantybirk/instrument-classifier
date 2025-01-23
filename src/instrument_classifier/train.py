@@ -16,6 +16,8 @@ from tqdm import tqdm
 from torch.profiler import profile
 from instrument_classifier.data import InstrumentDataset
 from instrument_classifier.model import CNNAudioClassifier
+import random
+import numpy as np
 import wandb
 from loguru import logger
 
@@ -32,9 +34,26 @@ def train_model(
     val_split: float = 0.2,  # Validation set size as fraction of total data
     profiler: Optional[profile] = None,
 ) -> None:
+    # Set all random seeds for reproducibility
+    random.seed(42)
+    np.random.seed(42)
+    torch.manual_seed(42)
+    torch.cuda.manual_seed(42)  # For CUDA GPU
+    torch.cuda.manual_seed_all(42)  # For multi-GPU
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    
+    # Create a generator for reproducible data splits
+    generator = torch.Generator().manual_seed(42)
+    
     wandb.init(
         project="instrument_classifier",
-        config={"num_epochs": num_epochs, "patience": patience, "val_split": val_split},
+        config={
+            "num_epochs": num_epochs,
+            "patience": patience,
+            "val_split": val_split,
+            "seed": 42
+        },
     )
 
     """Train the CNN audio classifier model.
@@ -63,9 +82,10 @@ def train_model(
     # Split into train and validation sets
     val_size = int(len(dataset) * val_split)
     train_size = len(dataset) - val_size
-    train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
+    train_dataset, val_dataset = random_split(dataset, [train_size, val_size], generator=generator)
 
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+    # Use the same generator for DataLoader to ensure reproducible shuffling
+    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, generator=generator, worker_init_fn=lambda x: torch.manual_seed(42))
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
     model = CNNAudioClassifier(num_classes=4, input_channels=1)
