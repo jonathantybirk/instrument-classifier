@@ -48,7 +48,7 @@ def preprocess(raw_data_path: Path, output_folder: Path) -> None:
     random.seed(42)
     np.random.seed(42)
     # Set librosa seed for reproducible audio processing
-    librosa.util.seed(42)
+    # librosa.util.seed(42)
     logger.warning("Random seeds for preprocessing set to 42 (random, numpy, librosa) for reproducibility")
 
     # Define target duration in seconds and sample rate
@@ -66,7 +66,7 @@ def preprocess(raw_data_path: Path, output_folder: Path) -> None:
 
         # Initialize paths
         output_path = output_folder / type
-        output_path.mkdir(exist_ok=True)
+        output_path.mkdir(parents=True, exist_ok=True)
 
         # simply copy the metadata to the output folder
         metadata.to_csv(output_folder / f"metadata_{type}.csv", index=False)

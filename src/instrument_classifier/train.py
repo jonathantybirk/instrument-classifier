@@ -48,10 +48,16 @@ def train_model(cfg: DictConfig) -> None:
     generator = torch.Generator().manual_seed(cfg.training.seed)
     logger.warning(f"PyTorch generator seed set to {cfg.training.seed} for reproducible data splitting")
 
+    # Initialize wandb with full configuration
     wandb.init(
         project=cfg.wandb.project,
         entity=cfg.wandb.entity,
-        config=dict(cfg.training),
+        config={
+            "model": dict(cfg.model),
+            "training": dict(cfg.training),
+            "data": dict(cfg.data),
+            "paths": dict(cfg.paths),
+        },
     )
 
     wandb.log({"message": "Initializing training process"})
@@ -78,7 +84,13 @@ def train_model(cfg: DictConfig) -> None:
     )
     val_loader = DataLoader(val_dataset, batch_size=cfg.training.batch_size, shuffle=False)
 
-    model = CNNAudioClassifier(num_classes=cfg.model.num_classes, input_channels=cfg.model.input_channels)
+    model = CNNAudioClassifier(
+        num_classes=cfg.model.num_classes,
+        input_channels=cfg.model.input_channels,
+        num_layers=cfg.model.num_layers,
+        kernel_size=cfg.model.kernel_size,
+        dropout_rate=cfg.model.dropout_rate,
+    )
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=cfg.training.learning_rate)
 
@@ -185,9 +197,19 @@ def train_model(cfg: DictConfig) -> None:
     plt.close()
 
     # Save the loss data
-    loss_data = {"train_losses": train_losses, "val_losses": val_losses}
+    loss_data = {"train_losses": train_losses, "val_losses": val_losses, "best_validation_loss": best_val_loss}
     with open(figures_dir / "loss_data.json", "w") as f:
         json.dump(loss_data, f)
+
+    # Log final metrics to wandb summary
+    wandb.summary["best_validation_loss"] = best_val_loss
+    wandb.summary["final_train_loss"] = train_losses[-1]
+    wandb.summary["final_val_loss"] = val_losses[-1]
+    wandb.summary["total_epochs"] = len(train_losses)
+
+    # Log final best validation loss
+    logger.warning(f"Best validation loss achieved: {best_val_loss:.4f}")
+    wandb.log({"best_validation_loss": best_val_loss})
 
 
 if __name__ == "__main__":
