@@ -39,3 +39,8 @@ jobs:
       - name: Test with pytest
         run: |
           pytest tests/test_data.py
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build the train Docker image
+        run: docker build . --file dockerfiles/train.dockerfile --tag train_image:$(date +%s)
