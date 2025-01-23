@@ -5,7 +5,6 @@ including data loading, model initialization, and the training loop.
 """
 
 from pathlib import Path
-from typing import Optional
 import json
 import matplotlib.pyplot as plt
 import torch
@@ -13,7 +12,6 @@ from torch.utils.data import DataLoader, random_split
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
-from torch.profiler import profile
 from instrument_classifier.data import InstrumentDataset
 from instrument_classifier.model import CNNAudioClassifier
 import random
@@ -28,6 +26,7 @@ logger.remove()  # Remove the default logger
 logger.add("logging/training.log", rotation="100 MB")
 
 logger.info("Loguru logger initialized")
+
 
 @hydra.main(config_path="../../configs", config_name="config", version_base=None)
 def train_model(cfg: DictConfig) -> None:
@@ -44,11 +43,11 @@ def train_model(cfg: DictConfig) -> None:
     torch.cuda.manual_seed_all(cfg.training.seed)  # For multi-GPU
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-    
+
     # Create a generator for reproducible data splits
     generator = torch.Generator().manual_seed(cfg.training.seed)
     logger.warning(f"PyTorch generator seed set to {cfg.training.seed} for reproducible data splitting")
-    
+
     wandb.init(
         project=cfg.wandb.project,
         entity=cfg.wandb.entity,
@@ -71,11 +70,11 @@ def train_model(cfg: DictConfig) -> None:
 
     # Use the same generator for DataLoader to ensure reproducible shuffling
     train_loader = DataLoader(
-        train_dataset, 
-        batch_size=cfg.training.batch_size, 
-        shuffle=True, 
-        generator=generator, 
-        worker_init_fn=lambda x: torch.manual_seed(cfg.training.seed)
+        train_dataset,
+        batch_size=cfg.training.batch_size,
+        shuffle=True,
+        generator=generator,
+        worker_init_fn=lambda x: torch.manual_seed(cfg.training.seed),
     )
     val_loader = DataLoader(val_dataset, batch_size=cfg.training.batch_size, shuffle=False)
 
@@ -96,7 +95,9 @@ def train_model(cfg: DictConfig) -> None:
         model.train()
         total_train_loss = 0
         total_train_samples = 0
-        for batch_idx, (data, labels) in enumerate(tqdm(train_loader, desc=f"Epoch {epoch+1}/{cfg.training.num_epochs}")):
+        for batch_idx, (data, labels) in enumerate(
+            tqdm(train_loader, desc=f"Epoch {epoch+1}/{cfg.training.num_epochs}")
+        ):
             data = data.clone().detach().unsqueeze(1).float()
             optimizer.zero_grad()
             outputs = model(data)
@@ -138,7 +139,11 @@ def train_model(cfg: DictConfig) -> None:
 
         wandb.log({"epoch": epoch + 1, "train_loss": avg_train_loss, "val_loss": avg_val_loss})
 
-        print(f"Epoch [{epoch+1}/{cfg.training.num_epochs}], " f"Train Loss: {avg_train_loss:.4f}, " f"Val Loss: {avg_val_loss:.4f}")
+        print(
+            f"Epoch [{epoch+1}/{cfg.training.num_epochs}], "
+            f"Train Loss: {avg_train_loss:.4f}, "
+            f"Val Loss: {avg_val_loss:.4f}"
+        )
 
         # Check if this is the best model
         if avg_val_loss < best_val_loss:
