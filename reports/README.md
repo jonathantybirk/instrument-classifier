@@ -194,16 +194,15 @@ From the cookiecutter template, we maintained the standard MLOps project structu
 - `src/` containing our main package code
 - `tests/` for unit and integration tests
 - `data/` for raw and processed data
-- `models/` for saved model artifacts
+- `models/` for saved model artifacts (though we save artifacts from cloud training with Google Cloud Artifact Registry)
 - `docs/` for documentation
 - `reports/` for project reports
 - `notebooks/` This was not used and therefore removed
 - `dockerfiles/` for container definitions
-- `configs/` for configuration management
+- `configs/` for hyper-parameter configuration with Hydra.
 
 We made a few deviations from the standard template by adding additional directories and files:
 - Added a `dockerfiles/` directory specifically for organizing our Docker configurations
-- Maintained `configs/` directories for different types of configurations
 - Added a comprehensive `.pre-commit-config.yaml` for code quality checks
 - Included DVC configuration with `.dvc/` and `.dvcignore` for data version control
 - Set up automated documentation generation through the `docs/` directory
