@@ -8,7 +8,14 @@ from omegaconf import DictConfig
 class CNNAudioClassifier(nn.Module):
     """A CNN-based audio classifier that supports variable-length spectrogram inputs."""
 
-    def __init__(self, num_classes: int = 4, input_channels: int = 1) -> None:
+    def __init__(
+        self,
+        num_layers: int = 3,
+        num_classes: int = 4,
+        input_channels: int = 1,
+        kernel_size: int = 3,
+        dropout_rate: float = 0.5,
+    ) -> None:
         """
         Initialize the model.
 
@@ -19,17 +26,52 @@ class CNNAudioClassifier(nn.Module):
         logging.info("Initializing CNNAudioClassifier")
         super().__init__()
 
+        self.dropout = nn.Dropout(dropout_rate)
+
         self.conv_layers = nn.Sequential(
-            nn.Conv2d(input_channels, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=(2, 2)),
-            nn.Conv2d(32, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=(2, 2)),
-            nn.Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
+            nn.Conv2d(input_channels, 8, kernel_size=(kernel_size, kernel_size), stride=(1, 1), padding=(1, 1)),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(2, 2)),
         )
+
+        layers = []
+        if num_layers in [3, 5, 7]:
+            layers.extend(
+                [
+                    nn.Conv2d(8, 16, kernel_size=(kernel_size, kernel_size), stride=(1, 1), padding=(1, 1)),
+                    nn.ReLU(),
+                    nn.MaxPool2d(kernel_size=(2, 2)),
+                    nn.Conv2d(16, 32, kernel_size=(kernel_size, kernel_size), stride=(1, 1), padding=(1, 1)),
+                    nn.ReLU(),
+                    nn.MaxPool2d(kernel_size=(2, 2)),
+                ]
+            )
+
+        if num_layers in [5, 7]:
+            layers.extend(
+                [
+                    nn.Conv2d(32, 64, kernel_size=(kernel_size, kernel_size), stride=(1, 1), padding=(1, 1)),
+                    nn.ReLU(),
+                    nn.MaxPool2d(kernel_size=(2, 2)),
+                    nn.Conv2d(64, 64, kernel_size=(kernel_size, kernel_size), stride=(1, 1), padding=(1, 1)),
+                    nn.ReLU(),
+                    nn.MaxPool2d(kernel_size=(2, 2)),
+                ]
+            )
+
+        if num_layers == 7:
+            layers.extend(
+                [
+                    nn.Conv2d(64, 64, kernel_size=(kernel_size, kernel_size), stride=(1, 1), padding=(1, 1)),
+                    nn.ReLU(),
+                    nn.MaxPool2d(kernel_size=(2, 2)),
+                    nn.Conv2d(64, 64, kernel_size=(kernel_size, kernel_size), stride=(1, 1), padding=(1, 1)),
+                    nn.ReLU(),
+                    nn.MaxPool2d(kernel_size=(2, 2)),
+                ]
+            )
+
+        self.conv_layers = nn.Sequential(self.conv_layers, *layers)
 
         self.fc = nn.Sequential(nn.Flatten(), nn.LazyLinear(100), nn.ReLU(), nn.Linear(100, num_classes))
 
@@ -44,6 +86,7 @@ class CNNAudioClassifier(nn.Module):
             torch.Tensor: Logits of shape (batch_size, num_classes).
         """
         x = self.conv_layers(x)
+        x = self.dropout(x)
         return self.fc(x)
 
 
