@@ -10,7 +10,7 @@ from tqdm import tqdm
 from loguru import logger
 
 logger.remove()  # Remove the default logger
-logger.add("logging/training.log", rotation="100 MB")
+logger.add("logging/preprocessing.log", rotation="100 MB")
 logger.info("Loguru logger initialized")
 
 class InstrumentDataset(Dataset):
