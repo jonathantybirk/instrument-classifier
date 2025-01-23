@@ -352,9 +352,15 @@ For example, type hints help catch type-related bugs before runtime and serve as
 > *We made use of config files. Whenever an experiment is run the following happens: ... . To reproduce an experiment*
 > *one would have to do ...*
 >
-> Answer:   
+> Answer:
 
---- question 13 fill here ---
+We implemented a comprehensive approach to ensure experiment reproducibility across our project. At the core, we used Hydra for managing all experimental configurations through our `configs/config.yaml` file. When an experiment runs, Hydra automatically creates a timestamped output directory that preserves the exact configuration used and maintains detailed training logs, ensuring we can trace exactly how each experiment was conducted.
+
+Our version control strategy plays an important role in reproducibility. Beyond tracking code changes in Git, we implemented DVC in conjunction with GCP Bucket for data versioning, which maintains consistent datasets across all experiments. We also use Weights & Biases (W&B) to version and track our model artifacts, providing a comprehensive history of our model evolution.
+
+The logging system combines W&B and loguru to capture all essential information. This includes not only basic training metrics but also model architecture details, hyperparameters, system information, and random seeds - all crucial elements for reproducing experimental conditions. We ensure deterministic behavior by setting fixed random seeds for PyTorch, numpy, and Python's random module at the start of each experiment, making our results reproducible across different runs.
+
+
 
 ### Question 14
 
