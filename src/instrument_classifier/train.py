@@ -45,6 +45,7 @@ def train_model(
     
     # Create a generator for reproducible data splits
     generator = torch.Generator().manual_seed(42)
+    logger.warning("PyTorch generator seed set to 42 for reproducible data splitting")
     
     wandb.init(
         project="instrument_classifier",
@@ -72,6 +73,7 @@ def train_model(
     5. Creates and saves a loss plot
     """
     wandb.log({"message": "Initializing training process"})
+    logger.info("Initializing training process")
 
     # Load the full dataset
     dataset = InstrumentDataset(
