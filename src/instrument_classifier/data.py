@@ -49,6 +49,7 @@ def preprocess(raw_data_path: Path, output_folder: Path) -> None:
     np.random.seed(42)
     # Set librosa seed for reproducible audio processing
     librosa.util.seed(42)
+    logger.warning("Random seeds for preprocessing set to 42 (random, numpy, librosa) for reproducibility")
 
     # Define target duration in seconds and sample rate
     TARGET_DURATION = 10
