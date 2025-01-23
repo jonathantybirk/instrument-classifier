@@ -13,6 +13,7 @@ logger.remove()  # Remove the default logger
 logger.add("logging/preprocessing.log", rotation="100 MB")
 logger.info("Loguru logger initialized")
 
+
 class InstrumentDataset(Dataset):
     """Dataset class for audio classification."""
 
@@ -37,6 +38,7 @@ class InstrumentDataset(Dataset):
         spectrogram = np.load(spectrogram_path)
         return spectrogram, label
 
+
 def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) -> None:
     """Preprocess the raw audio files and save spectrograms."""
     print("Preprocessing data... check /logging/preprocessing.log for progress and errors")
@@ -49,7 +51,7 @@ def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) 
     TARGET_DURATION = 10
     SAMPLE_RATE = 44100  # Standard audio sample rate
     TARGET_SAMPLES = TARGET_DURATION * SAMPLE_RATE
-    
+
     for type in ["train", "test"]:
         # Load metadata
         metadata_path = raw_data_path / f"metadata_{type}.csv"
