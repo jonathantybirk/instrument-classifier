@@ -1,19 +1,25 @@
 import torch
-import logging
+from loguru import logger
 from torch.utils.data import DataLoader
 from model import CNNAudioClassifier
 from data import InstrumentDataset
 
 
+logger.remove()  # Remove the default logger
+logger.add("logging/evaluation.log", rotation="100 MB")
+logger.info("Evaluation logger initialized")
+print("Evaluating model... check /logging/evaluation.log for progress and errors")
+
+
 def evaluate_model():
-    logging.info("Loading dataset for evaluation")
+    logger.info("Loading dataset for evaluation")
     dataset = InstrumentDataset(
         data_path="data/processed/test",  # Adjust as needed
         metadata_path="data/raw/metadata_test.csv",  # Adjust as needed
     )
     eval_loader = DataLoader(dataset, batch_size=8, shuffle=False)
 
-    logging.info("Loading model weights")
+    logger.info("Loading model weights")
     model = CNNAudioClassifier(num_classes=4, input_channels=1)
     model.load_state_dict(torch.load("models/best_cnn_audio_classifier.pt"))
     model.eval()
@@ -30,7 +36,7 @@ def evaluate_model():
             total += label.size(0)
 
     accuracy = correct / total if total else 0
-    logging.info(f"Evaluation accuracy: {accuracy:.2f}")
+    logger.warning(f"Evaluation accuracy: {accuracy:.2f}")
 
 
 if __name__ == "__main__":
