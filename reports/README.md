@@ -176,7 +176,7 @@ pip install -r requirements_dev.txt
 
 Rather than using `pip freeze`, we manually maintained our requirements files by adding dependencies as we introduced them to the project. This deliberate approach helped us keep our requirements lean and avoid including unnecessary packages that might have been installed in our environments but weren't actually used in the project. We made sure to specify version numbers for critical packages to ensure consistency across all team members' environments.
 
-### Question 5 (CHECK THIS ANSWER)
+### Question 5
 
 > **We expect that you initialized your project using the cookiecutter template. Explain the overall structure of your**
 > **code. What did you fill out? Did you deviate from the template in some way?**
@@ -199,15 +199,17 @@ From the cookiecutter template, we maintained the standard MLOps project structu
 - `reports/` for project reports
 - `notebooks/` This was not used and therefore removed
 - `dockerfiles/` for container definitions
-- `conf/` and `configs/` for configuration management
+- `configs/` for configuration management
 
 We made a few deviations from the standard template by adding additional directories and files:
 - Added a `dockerfiles/` directory specifically for organizing our Docker configurations
-- Maintained both `conf/` and `configs/` directories for different types of configurations
+- Maintained `configs/` directories for different types of configurations
 - Added a comprehensive `.pre-commit-config.yaml` for code quality checks
 - Included DVC configuration with `.dvc/` and `.dvcignore` for data version control
+- Set up automated documentation generation through the `docs/` directory
 
-### Question 6 (CHECK THIS ANSWER)
+
+### Question 6
 
 > **Did you implement any rules for code quality and format? What about typing and documentation? Additionally,**
 > **explain with your own words why these concepts matters in larger projects.**
@@ -350,7 +352,7 @@ For example, type hints help catch type-related bugs before runtime and serve as
 > *We made use of config files. Whenever an experiment is run the following happens: ... . To reproduce an experiment*
 > *one would have to do ...*
 >
-> Answer:
+> Answer:   
 
 --- question 13 fill here ---
 
@@ -491,7 +493,15 @@ We used GCP Bucket for storing our raw dataset. Bucket worked well because it di
 >
 > Answer:
 
---- question 23 fill here ---
+Yes, we managed to write an API for our model using FastAPI. The API was implemented with several key features:
+
+1. Asynchronous model loading using FastAPI's lifespan management to ensure the model is loaded only once at startup and properly cleaned up on shutdown
+2. A `/predict` endpoint that accepts audio file uploads (.wav or .mp3) and returns the predicted instrument classification
+3. A `/health` endpoint for monitoring the API's status and model availability
+4. Robust error handling for invalid file types and processing errors
+5. Secure file handling using temporary files that are properly cleaned up after processing
+
+We also added special features like automatic file type validation, detailed error messages with stack traces for debugging, and proper cleanup of temporary files even when errors occur. The API was containerized using Docker for easy deployment and tested using FastAPI's TestClient to ensure reliability. The implementation includes proper type hints and documentation strings for better code maintainability.
 
 ### Question 24
 
@@ -507,7 +517,32 @@ We used GCP Bucket for storing our raw dataset. Bucket worked well because it di
 >
 > Answer:
 
---- question 24 fill here ---
+We successfully deployed our API both locally and through Docker containerization. For local deployment, we wrapped our model into a FastAPI application that can be started using the command line interface:
+
+```bash
+invoke run-api
+```
+
+The API can then be invoked using another terminal with:
+
+```bash
+invoke send-request --path-to-audio "path/to/audio/file.wav"
+```
+
+For containerized deployment, we created a dedicated Dockerfile that sets up a Python environment with all necessary dependencies and exposes the API on port 8000. The Docker image can be built and run using:
+
+```bash
+docker build -f dockerfiles/api.dockerfile -t instrument-classifier-api .
+docker run -p 8000:8000 instrument-classifier-api
+```
+
+To invoke the containerized service, users can send POST requests to the `/predict` endpoint:
+
+```bash
+curl -X POST -F "file=@audio_sample.wav" http://localhost:8000/predict
+```
+
+The API includes proper error handling, file validation, and a health check endpoint to ensure reliable operation. While we successfully implemented and tested the API locally and in containers, we didn't proceed with cloud deployment due to time constraints. 
 
 ### Question 25
 
@@ -522,7 +557,39 @@ We used GCP Bucket for storing our raw dataset. Bucket worked well because it di
 >
 > Answer:
 
---- question 25 fill here ---
+For unit testing, we used pytest with FastAPI's TestClient to test our API endpoints. Our test suite (`tests/test_api.py`) included tests for:
+1. Health check endpoint functionality
+2. Prediction endpoint with real audio files
+3. Error handling for invalid file types
+4. Model loading verification
+
+However, we did not implement load testing. If we were to implement it, we would use locust, a popular Python-based load testing tool. The load testing implementation would something look like this:
+
+```python
+from locust import HttpUser, task, between
+
+class InstrumentClassifierUser(HttpUser):
+    wait_time = between(1, 3)
+    
+    @task
+    def predict_instrument(self):
+        with open("test_audio.wav", "rb") as audio_file:
+            self.client.post("/predict", 
+                           files={"file": audio_file})
+    
+    @task
+    def health_check(self):
+        self.client.get("/health")
+```
+
+This would help us understand:
+- Maximum requests per second our API can handle
+- Response time distribution under different loads
+- System behavior under sustained heavy traffic
+- Resource utilization patterns
+- Potential bottlenecks in our inference pipeline
+
+The load testing would be particularly important since our API processes audio files, which can be resource-intensive both in terms of memory and CPU usage.
 
 ### Question 26
 
@@ -621,5 +688,10 @@ One of the struggles we faced in this project was setting up DVC with google dri
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
+All members contributed equally and in collaboration to the project, however, for the sake of the requirement, this is the best estimate of the contributions:
+Lucas API
+Jon DVC
+
+
 --- question 31 fill here ---
-We have actively used cursor throughout the project to help us write code and debug. However, every single suggestion had to be read by fully by us to ensure correctness and a continual understanding of our codebase.
+We have actively used cursor throughout the project to help us write code and debug. However, every single suggestion had to be read fully by us to ensure correctness and a continual understanding of our codebase.
