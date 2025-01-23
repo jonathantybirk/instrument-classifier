@@ -21,7 +21,7 @@ from loguru import logger
 
 # Configure loguru to write logs to a file and not to the console
 logger.remove()  # Remove the default logger
-logger.add("training.log", rotation="100 MB")
+logger.add("logging/training.log", rotation="100 MB")
 
 logger.info("Loguru logger initialized")
 

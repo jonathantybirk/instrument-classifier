@@ -7,13 +7,18 @@ import librosa
 import pandas as pd
 import random
 from tqdm import tqdm
+from loguru import logger
+
+logger.remove()  # Remove the default logger
+logger.add("logging/preprocessing.log", rotation="100 MB")
+logger.info("Loguru logger initialized")
 
 
 class InstrumentDataset(Dataset):
     """Dataset class for audio classification."""
 
     def __init__(self, data_path: Path, metadata_path: Path) -> None:
-        self.data_path = data_path
+        self.data_path = Path(data_path)  # Convert to Path object explicitly
         self.metadata = pd.read_csv(metadata_path)
         self.classes = self.metadata["Class"].unique()
         self.class_to_idx = {cls: idx for idx, cls in enumerate(self.classes)}
@@ -31,13 +36,13 @@ class InstrumentDataset(Dataset):
 
         # Load spectrogram
         spectrogram = np.load(spectrogram_path)
-
         return spectrogram, label
 
 
 def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) -> None:
     """Preprocess the raw audio files and save spectrograms."""
-    print("Preprocessing data...")
+    print("Preprocessing data... check /logging/preprocessing.log for progress and errors")
+    logger.warning("Preprocessing started")
     # Set random seed for reproducibility
     random.seed(random_seed)
     np.random.seed(random_seed)
@@ -52,7 +57,9 @@ def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) 
         metadata_path = raw_data_path / f"metadata_{type}.csv"
         metadata = pd.read_csv(metadata_path)
 
-        print(f"\nProcessing {type} data...")
+        # Log when starting to process train and test data
+        logger.warning(f"Preprocessing {type} data...")
+
         # Initialize paths
         output_path = output_folder / type
         output_path.mkdir(exist_ok=True)
@@ -64,7 +71,7 @@ def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) 
         for _, row in tqdm(metadata.iterrows(), total=len(metadata), desc=f"Processing {type} files"):
             audio_file = raw_data_path / f"{type}_submission" / row["FileName"]
             if not audio_file.exists():
-                print(f"Warning: File {audio_file} not found, skipping...")
+                logger.error(f"File {audio_file} not found, skipping...")
                 continue
 
             # Load the sound clip
@@ -99,7 +106,7 @@ def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) 
                 np.save(output_path / f"{audio_file.stem}.npy", S_DB)
 
             except Exception as e:
-                print(f"Error processing {audio_file}: {str(e)}")
+                logger.error(f"Error processing {audio_file}: {str(e)}")
                 continue
 
     print("Preprocessing completed!")
