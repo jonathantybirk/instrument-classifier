@@ -1,0 +1,5 @@
+outs:
+- md5: 713e642916a9cff88b992e8eb5b4d1fe
+  size: 2915312
+  hash: md5
+  path: best_cnn_audio_classifier.pt
