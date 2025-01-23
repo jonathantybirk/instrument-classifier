@@ -8,14 +8,14 @@ RUN apt update && \
 COPY requirements.txt requirements.txt
 COPY requirements_dev.txt requirements_dev.txt
 
-# RUN pip install -r requirements.txt --no-cache-dir --verbose
+RUN pip install -r requirements.txt --no-cache-dir --verbose
 
-# COPY src/instrument_classifier/train.py src/instrument_classifier/train.py
-# COPY src/instrument_classifier/data.py src/instrument_classifier/data.py
-# COPY src/instrument_classifier/model.py src/instrument_classifier/model.py
-# COPY data/processed data/processed
-# COPY pyproject.toml pyproject.toml
+COPY src/instrument_classifier/train.py src/instrument_classifier/train.py
+COPY src/instrument_classifier/data.py src/instrument_classifier/data.py
+COPY src/instrument_classifier/model.py src/instrument_classifier/model.py
+COPY data/processed data/processed
+COPY pyproject.toml pyproject.toml
 
-# RUN pip install . --no-deps --no-cache-dir --verbose
+RUN pip install . --no-deps --no-cache-dir --verbose
 
-# ENTRYPOINT ["python", "-u", "src/instrument_classifier/train.py"]
+ENTRYPOINT ["python", "-u", "src/instrument_classifier/train.py"]
