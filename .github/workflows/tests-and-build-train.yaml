@@ -1,4 +1,4 @@
-name: Unit Tests
+name: Tests and Build Train
 
 on:
   push:
@@ -42,5 +42,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Build the train Docker image
         run: docker build . --file dockerfiles/train.dockerfile --tag train_image:$(date +%s)
