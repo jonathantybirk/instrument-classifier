@@ -6,7 +6,7 @@ from data import InstrumentDataset
 
 
 logger.remove()  # Remove the default logger
-logger.add("output/logging/evaluation.log", rotation="100 MB")
+logger.add("logging/evaluation.log", rotation="100 MB")
 logger.info("Evaluation logger initialized")
 print("Evaluating model... check /logging/evaluation.log for progress and errors")
 
