@@ -176,9 +176,9 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# Ignore all files in data/raw and data/processed
-data/raw/
-data/processed/
-
-# Ignore models
+# models
 models/
+
+#wandb
+wandb
+
