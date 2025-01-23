@@ -184,3 +184,6 @@ wandb
 
 # outputs
 outputs/*
+
+# sweeping
+multirun/
