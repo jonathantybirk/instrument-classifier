@@ -350,7 +350,7 @@ For example, type hints help catch type-related bugs before runtime and serve as
 > *We made use of config files. Whenever an experiment is run the following happens: ... . To reproduce an experiment*
 > *one would have to do ...*
 >
-> Answer:
+> Answer:   
 
 --- question 13 fill here ---
 
@@ -621,5 +621,10 @@ One of the struggles we faced in this project was setting up DVC with google dri
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
+All members contributed equally and in collaboration to the project, however, for the sake of the requirement, this is the best estimate of the contributions:
+Lucas API
+Jon DVC
+
+
 --- question 31 fill here ---
-We have actively used cursor throughout the project to help us write code and debug. However, every single suggestion had to be read by fully by us to ensure correctness and a continual understanding of our codebase.
+We have actively used cursor throughout the project to help us write code and debug. However, every single suggestion had to be read fully by us to ensure correctness and a continual understanding of our codebase.
