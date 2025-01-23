@@ -39,13 +39,16 @@ class InstrumentDataset(Dataset):
         return spectrogram, label
 
 
-def preprocess(raw_data_path: Path, output_folder: Path, random_seed: int = 42) -> None:
+def preprocess(raw_data_path: Path, output_folder: Path) -> None:
     """Preprocess the raw audio files and save spectrograms."""
     print("Preprocessing data... check /logging/preprocessing.log for progress and errors")
     logger.warning("Preprocessing started")
+    
     # Set random seed for reproducibility
-    random.seed(random_seed)
-    np.random.seed(random_seed)
+    random.seed(42)
+    np.random.seed(42)
+    # Set librosa seed for reproducible audio processing
+    librosa.util.seed(42)
 
     # Define target duration in seconds and sample rate
     TARGET_DURATION = 10
@@ -116,4 +119,4 @@ if __name__ == "__main__":
     RAW_DATA = Path("data/raw")
     OUTPUT_FOLDER = Path("data/processed")
     OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
-    typer.run(lambda: preprocess(raw_data_path=RAW_DATA, output_folder=OUTPUT_FOLDER, random_seed=42))
+    typer.run(lambda: preprocess(raw_data_path=RAW_DATA, output_folder=OUTPUT_FOLDER))
