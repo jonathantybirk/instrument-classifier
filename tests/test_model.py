@@ -19,13 +19,13 @@ def test_forward_pass():
     model = CNNAudioClassifier(num_classes=4, input_channels=1)
 
     # Test with small input
-    batch_size, n_mels, seq_len = 2, 64, 32
+    batch_size, n_mels, seq_len = 10, 128, 862
     x = torch.randn(batch_size, 1, n_mels, seq_len)
     output = model(x)
     assert output.shape == (batch_size, 4)
 
     # Test with larger input
-    batch_size, n_mels, seq_len = 16, 128, 64
+    batch_size, n_mels, seq_len = 1, 128, 862
     x = torch.randn(batch_size, 1, n_mels, seq_len)
     output = model(x)
     assert output.shape == (batch_size, 4)
@@ -50,12 +50,12 @@ def test_model_parameters():
     """Test model parameter properties."""
     model = CNNAudioClassifier()
 
+    x = torch.randn(2, 1, 128, 862)
+    output = model(x)
     # Verify model has learnable parameters
     assert sum(p.numel() for p in model.parameters()) > 0
 
     # Test that gradients can flow
-    x = torch.randn(2, 1, 64, 48)
-    output = model(x)
     loss = output.sum()
     loss.backward()
 
@@ -68,10 +68,12 @@ def test_invalid_inputs():
     """Test model behavior with invalid inputs."""
     model = CNNAudioClassifier()
 
-    # Test with wrong number of dimensions
-    with pytest.raises(RuntimeError):
-        model(torch.randn(1, 64, 48))  # Missing channel dimension
+    # Test with wrong number of dimensions, should not raise an error
+    try:
+        model(torch.randn(1, 128, 862))  # Missing channel dimension
+    except RuntimeError:
+        pytest.fail("Didn't automatically reshape samples to 4D tensor")
 
     # Test with wrong number of channels
     with pytest.raises(RuntimeError):
-        model(torch.randn(2, 2, 64, 48))  # 2 channels instead of 1
+        model(torch.randn(2, 2, 128, 862))  # 2 channels instead of 1
