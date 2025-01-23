@@ -123,7 +123,7 @@ def train_model(cfg: DictConfig) -> None:
             total_train_samples += batch_size
 
             # Log batch loss to the designated file for specific batches
-            if batch_idx + 1 in [1, 10, 20, 30, 40, 50, 60]:
+            if batch_idx % 10 == 1:
                 logger.info(f"Batch [{batch_idx+1}/{len(train_loader)}], Loss: {loss.item():.4f}")
 
         avg_train_loss = total_train_loss / total_train_samples
