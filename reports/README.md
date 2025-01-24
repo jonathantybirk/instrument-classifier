@@ -252,7 +252,7 @@ For example, type hints help catch type-related bugs before runtime and serve as
 >
 > Answer:
 
-In total, we have implemented 10 tests across four critical components of our application. Our test suite covers data processing (testing dataset loading and preprocessing), model architecture (testing initialization, forward passes, and edge cases), training pipeline (testing with mock data and wandb integration), and API functionality (testing health checks and prediction capabilities). These components were prioritized as they form the core of our ML pipeline, from data ingestion through to model serving. We would like to have tested evaluation.py as well, but it was overlooked and afterwards deprioritized due to time constraints.
+In total, we have implemented 10 tests across four critical components of our application. Our test suite covers data processing (testing dataset loading and preprocessing), model architecture (testing initialization, forward passes, and edge cases), training pipeline (testing with mock data and wandb integration), and API functionality (testing health checks and prediction capabilities). These components were prioritized as they form the core of our ML pipeline, from data ingestion through to model serving. We would like to have tested evaluation.py as well, but it was deprioritized due to time constraints.
 
 ### Question 8
 
@@ -267,15 +267,14 @@ In total, we have implemented 10 tests across four critical components of our ap
 >
 > Answer:
 
-The total code coverage of our project is approximately 85%, which includes tests for our core modules: data processing, model architecture, training pipeline, and API endpoints. We have 8 tests covering critical components:
+The total code coverage of our project is approximately 85%, which includes tests for our core modules: data processing, model architecture, training pipeline, and API endpoints. Our test suite consists of 10 comprehensive tests covering critical components:
 
 1. Data processing tests (test_data.py) - Testing dataset loading and preprocessing
 2. Model tests (test_model.py) - Testing model architecture and forward passes
 3. Training tests (test_train.py) - Testing the training pipeline with mock data
 4. API tests (test_api.py) - Testing endpoints and predictions
 
-Even with this high coverage, we wouldn't trust it to be completely error-free. Code coverage only measures which lines of code are executed during tests, not the quality or comprehensiveness of the test cases themselves. For example, our tests might not cover all edge cases, rare error conditions, or interactions between components. Additionally, real-world use and data distributions might differ significantly from our test scenarios. This is particularly relevant for our audio processing pipeline, where the variety of possible input files and formats makes full testing impractical.
-
+Even with this high coverage, we wouldn't trust it to be completely error-free. Code coverage only measures which lines of code are executed during tests, not the quality or comprehensiveness of the test cases themselves. For example, our tests might not cover all edge cases, rare error conditions, or interactions between components. Additionally, real-world usage patterns and data distributions might differ significantly from our test scenarios. This is particularly relevant for our audio processing pipeline, where the variety of possible input files and formats makes exhaustive testing impractical.
 
 ### Question 9
 
@@ -681,6 +680,31 @@ We set up GitHub Pages for our docomentation, but then ended up not writing a lo
 > *Whenever we commit code and push to GitHub, it auto triggers ... and ... . From there the diagram shows ...*
 >
 > Answer:
+Our architecture is shown in the figure below.
+
+![alt text](figures/mlops.drawio.png)
+
+The starting point of our MLOps pipeline is our local development environment, where we integrated several key tools. We used Hydra for hyperparameter management and configuration (in `configs/config.yaml`), FastAPI for creating our API endpoints (in `src/instrument_classifier/api.py`), and DVC for data version control.
+
+When code changes are made locally, they first go through pre-commit hooks using Ruff for initial code quality checks. Our pre-commit configuration enforces linting, trailing whitespace removal, and YAML validation. Upon pushing to GitHub, this triggers multiple automated workflows:
+1. GitHub Actions run our test suite (10 tests covering data processing, model architecture, training, and API functionality)
+2. A documentation workflow that automatically updates our GitHub Pages
+3. A build workflow that constructs our Docker images and pushes them to GCP Container Registry
+
+Our data pipeline runs parallel to this through DVC, which manages our dataset storage in GCP buckets. The raw audio files are processed through our preprocessing pipeline (implemented in `src/instrument_classifier/data.py`) which handles:
+- Audio loading with librosa
+- Resampling to 44.1kHz
+- Mel spectrogram conversion
+- Normalization
+
+When we train our models using the Docker images in GCP Engine, the training metrics are logged to Weights & Biases (W&B) for experiment tracking. Our W&B integration tracks:
+- Training and validation loss per epoch
+- Best validation loss achieved
+- Total epochs run
+- Model and training configurations via Hydra
+
+The API system provides endpoints for model inference, with features like asynchronous model loading, health checks, and robust error handling. While we have containerized the API and tested it locally, we haven't yet deployed it to GCP Cloud Run, which would be one of the next logical steps in our pipeline.
+
 
 Our architecture is shown in the figure below.
 
