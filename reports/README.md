@@ -683,8 +683,32 @@ Monitoring extends the longevity of a machine learning application by maintainin
 > *Whenever we commit code and push to GitHub, it auto triggers ... and ... . From there the diagram shows ...*
 >
 > Answer:
+Our architecture is shown in the figure below.
 
---- question 29 fill here ---
+![alt text](figures/mlops.drawio.png)
+
+The starting point of our MLOps pipeline is our local development environment, where we integrated several key tools. We used Hydra for hyperparameter management and configuration (in `configs/config.yaml`), FastAPI for creating our API endpoints (in `src/instrument_classifier/api.py`), and DVC for data version control.
+
+When code changes are made locally, they first go through pre-commit hooks using Ruff for initial code quality checks. Our pre-commit configuration enforces linting, trailing whitespace removal, and YAML validation. Upon pushing to GitHub, this triggers multiple automated workflows:
+1. GitHub Actions run our test suite (10 tests covering data processing, model architecture, training, and API functionality)
+2. A documentation workflow that automatically updates our GitHub Pages
+3. A build workflow that constructs our Docker images and pushes them to GCP Container Registry
+
+Our data pipeline runs parallel to this through DVC, which manages our dataset storage in GCP buckets. The raw audio files are processed through our preprocessing pipeline (implemented in `src/instrument_classifier/data.py`) which handles:
+- Audio loading with librosa
+- Resampling to 44.1kHz
+- Mel spectrogram conversion
+- Normalization
+
+When we train our models using the Docker images in GCP Engine, the training metrics are logged to Weights & Biases (W&B) for experiment tracking. Our W&B integration tracks:
+- Training and validation loss per epoch
+- Best validation loss achieved
+- Total epochs run
+- Model and training configurations via Hydra
+
+The API system provides endpoints for model inference, with features like asynchronous model loading, health checks, and robust error handling. While we have containerized the API and tested it locally, we haven't yet deployed it to GCP Cloud Run, which would be one of the next logical steps in our pipeline.
+
+
 
 ### Question 30
 
@@ -698,7 +722,9 @@ Monitoring extends the longevity of a machine learning application by maintainin
 >
 > Answer:
 
-One of the struggles we faced in this project was setting up DVC with google drive to save our raw dataset, which we tried at for several hours. In the end we were forced to give up on. This problem was due to some security issues between the two services, and this made google drive block DVC. We worked our way around it by doing DVC with a GCP bucket instead. This approach worked out well for us, since we had to use GCP regardless.
+One of the struggles we faced in this project was setting up DVC with google drive to save our raw dataset, which we tried at for several hours. In the end we were forced to give up on this. The problem was due to some security issues between the two services, and this made google drive block DVC. We knew this from the course material of course, but had not expected it to actually be so hard to fix. We worked our way around it by doing DVC with a GCP bucket instead. This approach worked out well for us, since we had to use GCP regardless, but we could not for the life of us get versioning to work here. While not critical right now, as we only had one static dataset, it would have been nice to have set up for future-proofing.
+
+Another significant challenge was setting up our Docker environments in Google Cloud Platform. The main complexity arose from the need to pull DVC-tracked data during the Docker image build process in the cloud. Our Docker builds needed the dataset to build properly, but accessing the dataset required proper GCP authentication, which in turn needed to be securely managed through GitHub secrets. We encountered several issues with authentication challenges, inefficient data transfers where the entire dataset was being pulled instead of just the processed data, and DVC configuration issues in the cloud environment versus local development. We eventually solved these issues by implementing proper GitHub secrets management for GCP authentication, carefully structuring our .dockerignore and .dvcignore files, and modifying our CI/CD pipeline to only pull the processed dataset. 
 
 ### Question 31
 
