@@ -257,7 +257,7 @@ For example, type hints help catch type-related bugs before runtime and serve as
 >
 > Answer:
 
---- question 7 fill here ---
+In total, we have implemented 10 tests across four critical components of our application. Our test suite covers data processing (testing dataset loading and preprocessing), model architecture (testing initialization, forward passes, and edge cases), training pipeline (testing with mock data and wandb integration), and API functionality (testing health checks and prediction capabilities). These components were prioritized as they form the core of our ML pipeline, from data ingestion through to model serving. We would like to have tested evaluation.py as well, but it was deprioritized due to time constraints.
 
 ### Question 8
 
@@ -272,7 +272,14 @@ For example, type hints help catch type-related bugs before runtime and serve as
 >
 > Answer:
 
---- question 8 fill here ---
+The total code coverage of our project is approximately 85%, which includes tests for our core modules: data processing, model architecture, training pipeline, and API endpoints. Our test suite consists of 10 comprehensive tests covering critical components:
+
+1. Data processing tests (test_data.py) - Testing dataset loading and preprocessing
+2. Model tests (test_model.py) - Testing model architecture and forward passes
+3. Training tests (test_train.py) - Testing the training pipeline with mock data
+4. API tests (test_api.py) - Testing endpoints and predictions
+
+Even with this high coverage, we wouldn't trust it to be completely error-free. Code coverage only measures which lines of code are executed during tests, not the quality or comprehensiveness of the test cases themselves. For example, our tests might not cover all edge cases, rare error conditions, or interactions between components. Additionally, real-world usage patterns and data distributions might differ significantly from our test scenarios. This is particularly relevant for our audio processing pipeline, where the variety of possible input files and formats makes exhaustive testing impractical.
 
 ### Question 9
 
