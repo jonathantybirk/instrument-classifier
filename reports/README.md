@@ -95,8 +95,7 @@ will check the repositories and the code to verify your answers.
 * [ ] Setup cloud monitoring of your instrumented application (M28)
 * [ ] Create one or more alert systems in GCP to alert you if your app is not behaving correctly (M28)
 * [ ] If applicable, optimize the performance of your data loading using distributed data loading (M29)
-* [x] If applicable, optimize the performance of your training pipeline by using distributed training (M30)
-(TECHNICALLY YES, as we trained the final four models in parallel on different computers)
+* [ ] If applicable, optimize the performance of your training pipeline by using distributed training (M30)
 * [ ] Play around with quantization, compilation and pruning for you trained models to increase inference speed (M31)
 
 ### Extra
@@ -236,7 +235,6 @@ These concepts are crucial in larger projects because they ensure:
 
 For example, type hints help catch type-related bugs before runtime and serve as inline documentation, making it easier for team members to understand function interfaces without diving into implementation details.
 
-
 ## Version control
 
 > In the following section we are interested in how version control was used in your project during development to
@@ -271,12 +269,10 @@ In total, we have implemented 10 tests across four critical components of our ap
 
 The total code coverage of our project is approximately 85%, which includes tests for our core modules: data processing, model architecture, training pipeline, and API endpoints. We have 8 tests covering critical components:
 
-
 1. Data processing tests (test_data.py) - Testing dataset loading and preprocessing
 2. Model tests (test_model.py) - Testing model architecture and forward passes
 3. Training tests (test_train.py) - Testing the training pipeline with mock data
 4. API tests (test_api.py) - Testing endpoints and predictions
-
 
 Even with this high coverage, we wouldn't trust it to be completely error-free. Code coverage only measures which lines of code are executed during tests, not the quality or comprehensiveness of the test cases themselves. For example, our tests might not cover all edge cases, rare error conditions, or interactions between components. Additionally, real-world use and data distributions might differ significantly from our test scenarios. This is particularly relevant for our audio processing pipeline, where the variety of possible input files and formats makes full testing impractical.
 
@@ -366,7 +362,6 @@ Our version control strategy plays an important role in reproducibility. Beyond 
 
 The logging system combines W&B and loguru to capture all essential information. This includes not only basic training metrics but also model architecture details, hyperparameters, system information, and random seeds - all crucial elements for reproducing experimental conditions. We ensure deterministic behavior by setting fixed random seeds for PyTorch, numpy, and Python's random module at the start of each experiment, making our results reproducible across different runs.
 
-
 ### Question 14
 
 > **Upload 1 to 3 screenshots that show the experiments that you have done in W&B (or another experiment tracking**
@@ -421,7 +416,6 @@ As we really wanted to implement both W&B and loguru in our project, we decided 
 
 Profiling:
 We implemented profiling with PyTorch's built-in profiler to analyze our model's performance. The profiling results showed that the majority of time is spent on essential computations: backward pass (288ms), forward pass (200ms), and optimizer step (81ms) per batch of 8 samples. The total training time for 5 batches averaged 2934ms, with only 89ms (3%) spent on auxiliary tasks. We assume this distribution is quite optimal for our hardware and model architecture, as the bulk of computation time (97%) is dedicated to core model operations which are built in the optimized PyTorch backend.
-
 
 ## Working in the cloud
 
@@ -655,7 +649,7 @@ Monitoring extends the longevity of a machine learning application by ensuring m
 
 We initially ran the Google Cloud Bucket on one group member's account, but later moved it to another group members's account, where the Compute Engine and Artifact Registry were also run.
 The first group member used about 7 kroner on the Google Cloud bucket.
-We do unforunately not have access to the second group member's billing details, as they are currently on a plane going to Poland as I am writing this and the deadline is tonight!
+The second group member used all $50 of credit.
 
 ### Question 28
 
@@ -713,7 +707,6 @@ When we train our models using the Docker images in GCP Engine, the training met
 
 The API system provides endpoints for model inference, with features like asynchronous model loading, health checks, and robust error handling. While we have containerized the API and tested it locally, we haven't yet deployed it to GCP Cloud Run, which would be one of the next logical steps in our pipeline.
 
-
 ### Question 30
 
 > **Discuss the overall struggles of the project. Where did you spend most time and what did you do to overcome these**
@@ -728,7 +721,6 @@ The API system provides endpoints for model inference, with features like asynch
 
 One of the struggles we faced in this project was setting up DVC with google drive to save our raw dataset, which we tried at for several hours. In the end we were forced to give up on this. The problem was due to some security issues between the two services, and this made google drive block DVC. We knew this from the course material of course, but had not expected it to actually be so hard to fix. We worked our way around it by doing DVC with a GCP bucket instead. This approach worked out well for us, since we had to use GCP regardless, but we could not for the life of us get versioning to work here. While not critical right now, as we only had one static dataset, it would have been nice to have set up for future-proofing.
 Another significant challenge was setting up our Docker environments in Google Cloud Platform. The main complexity arose from the need to pull DVC-tracked data during the Docker image build process in the cloud. Our Docker builds needed the dataset to build properly, but accessing the dataset required proper GCP authentication, which in turn needed to be securely managed through GitHub secrets. We encountered several issues with authentication challenges, inefficient data transfers where the entire dataset was being pulled instead of just the processed data, and DVC configuration issues in the cloud environment versus local development. We eventually solved these issues by implementing proper GitHub secrets management for GCP authentication, carefully structuring our .dockerignore and .dvcignore files, and modifying our CI/CD pipeline to only pull the processed dataset. 
-
 
 ### Question 31
 
