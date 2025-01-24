@@ -1,8 +1,8 @@
 import torch
 from loguru import logger
 from torch.utils.data import DataLoader
-from model import CNNAudioClassifier
 from data import InstrumentDataset
+from inference import load_model
 
 
 logger.remove()  # Remove the default logger
@@ -20,8 +20,7 @@ def evaluate_model():
     eval_loader = DataLoader(dataset, batch_size=8, shuffle=False)
 
     logger.info("Loading model weights")
-    model = CNNAudioClassifier(num_classes=4, input_channels=1)
-    model.load_state_dict(torch.load("models/best_cnn_audio_classifier.pt"))
+    model = load_model()
     model.eval()
 
     # Placeholder loop for evaluation

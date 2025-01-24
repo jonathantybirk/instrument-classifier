@@ -89,9 +89,14 @@ def process_audio_file(audio_path: str, model: CNNAudioClassifier) -> int:
             raise ValueError("No valid predictions could be made from the audio file")
 
 
-def load_model(model_path: str = "models/cnn_audio_classifier.pt") -> CNNAudioClassifier:
+def load_model(model_path: str = "models/best_cnn_audio_classifier.pt") -> CNNAudioClassifier:
     """Load the trained model."""
-    model = CNNAudioClassifier(num_classes=4, input_channels=1)
-    model.load_state_dict(torch.load(model_path))
-    model.eval()
-    return model
+    for i in [1, 3, 5, 7]:
+        try:
+            model = CNNAudioClassifier(num_classes=4, input_channels=1, num_layers=i)
+            model.load_state_dict(torch.load(model_path))
+            model.eval()
+            return model
+        except Exception as e:
+            logger.error(f"Error loading model: {str(e)}")
+    raise
